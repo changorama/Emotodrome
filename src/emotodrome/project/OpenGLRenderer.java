@@ -266,14 +266,21 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		userAvatar.y = camera.getEyeY();
 		userAvatar.z = camera.getEyeZ();
 		
+		new Thread(new IceThread()).start();
 //		Circle c = new Circle(5, 100);
 //		c.y = 0;
 //		c.x = camera.getEyeX();
 //		c.z = camera.getEyeZ() -1;
-		//CircleWave c = new CircleWave(5, .01f, 1, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
-		Circle c = new Circle(1, .1f, 1, new float[]{0, 1, 0, 1});
-		c.z = -5;
-		ice.add(c);
+//		for (int i = 0; i < 70; i++){
+////			for (int j = 0; j < 30; j++) {
+//				CircleWave c = new CircleWave(5, .01f, 1, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
+////				Circle c = new Circle(1, .1f, 1, new float[]{0, 1, 0, 1});
+//				c.z = -5 * i;
+////				c.x = 1*j;
+////				c.y = 1;
+//				ice.add(c);
+////			}
+//		}
 		
 //		ice = new TriangleOrigami[170][360];
 //		for (int i = 0; i < 170; i++){
@@ -437,22 +444,22 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		//userAvatar.draw(gl);
 		//gl.glPopMatrix();
 		
-		Collection<User> collection = users.values();
-		gl.glPushMatrix();
-		for (User user:collection){
-			Mesh avatar = user.getUserAvatar();
-			if (avatar == null){
-				avatar = user.setUserAvatar(new Plane(1, 1));
-				avatar.rx = 90;
-				avatar.loadGLTexture(gl, context, R.drawable.avatar);
-			}
-			Vec3 userVector = user.getUserVector();
-			avatar.x = userVector.x;
-			avatar.y = userVector.y;
-			avatar.z = userVector.z;
-			user.draw(gl);
-		}
-		gl.glPopMatrix();
+//		Collection<User> collection = users.values();
+//		gl.glPushMatrix();
+//		for (User user:collection){
+//			Mesh avatar = user.getUserAvatar();
+//			if (avatar == null){
+//				avatar = user.setUserAvatar(new Plane(1, 1));
+//				avatar.rx = 90;
+//				avatar.loadGLTexture(gl, context, R.drawable.avatar);
+//			}
+//			Vec3 userVector = user.getUserVector();
+//			avatar.x = userVector.x;
+//			avatar.y = userVector.y;
+//			avatar.z = userVector.z;
+//			user.draw(gl);
+//		}
+//		gl.glPopMatrix();
 
 //		for (int i = (int) (camera.getEyeX()); i < camera.getEyeX() + 20; i++){
 //			for (int j = (int) camera.getEyeZ(); j < camera.getEyeZ() + 20; j++){
@@ -482,7 +489,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		ice.draw(gl);
 		gl.glPopMatrix();
 
-		gl.glDisable(GL10.GL_TEXTURE_2D);
+		//gl.glDisable(GL10.GL_TEXTURE_2D);
 //		angle = (angle + 3.0f) % 360;
 //		for (int i = 0; i < NUMSHAPES; i++){
 //			gl.glPushMatrix();
@@ -503,7 +510,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		//bezier.draw(gl);
 		//gl.glPopMatrix();
 		
-		gl.glEnable(GL10.GL_TEXTURE_2D);
+		//gl.glEnable(GL10.GL_TEXTURE_2D);
 	}		
 
 	private synchronized void addIce() {
@@ -724,9 +731,14 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 				Vec3 userLocation = camera.getEye();
 				for (int lat = -50; lat < 50; lat++){
 					for (int lon = -50; lon < 50; lon++){
-						Float iceValue = iceData.get(new Vec3(userLocation.x + lat, 0, userLocation.z + lon));
+						Vec3 pos = new Vec3(userLocation.x + lat, 0, userLocation.z + lon);
+						Float iceValue = iceData.get(pos);
 						if (iceValue != null){
-							
+							CircleWave c = new CircleWave(5, .01f, 1, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
+							c.x = pos.x;
+							c.z = pos.z;
+							c.y = 1;
+							ice.add(c);
 						}
 					}
 				}

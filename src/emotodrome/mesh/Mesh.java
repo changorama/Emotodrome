@@ -51,6 +51,12 @@ public class Mesh implements Cloneable{
 
 	public float rz = 0;
 	
+	public float scalex = 1;
+	
+	public float scaley = 1;
+	
+	public float scalez = 1;
+	
 	
 	public void draw(GL10 gl) {
 		//Bind the texture according to the set texture filter
@@ -70,6 +76,7 @@ public class Mesh implements Cloneable{
 		gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
 		gl.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
 		gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
+		gl.glEnableClientState(GL10.GL_COLOR_ARRAY);
 		
 		gl.glFrontFace(GL10.GL_CCW);
 		
@@ -85,12 +92,13 @@ public class Mesh implements Cloneable{
 		gl.glRotatef(rx, 1, 0, 0);
 		gl.glRotatef(ry, 0, 1, 0);
 		gl.glRotatef(rz, 0, 0, 1);
+		gl.glScalef(scalex, scaley, scalez);
 		
-		gl.glColor4f(rgba[0], rgba[1], rgba[2], rgba[3]);
-		gl.glColor4f(1f, 1f, 0f, 1f);
-		//FloatBuffer mcolor = FloatBuffer.allocate(4);
-		//FloatBuffer.wrap(new float[]{ 1.0f, 1.0f, 0.0f, 0.5f });
-		//gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_SPECULAR, mcolor);
+		//gl.glColor4f(rgba[0], rgba[1], rgba[2], rgba[3]);
+		//gl.glColor4f(1f, 1f, 0f, 1f);
+		FloatBuffer mcolor = FloatBuffer.allocate(4);
+		FloatBuffer.wrap(new float[]{ 1.0f, 1.0f, 0.0f, 0.5f });
+		gl.glMaterialfv(GL10.GL_FRONT_AND_BACK, GL10.GL_SPECULAR, mcolor);
 		//Draw the vertices as triangles, based on the Index Buffer information
 		gl.glDrawElements(GL10.GL_TRIANGLES, numOfIndices, GL10.GL_UNSIGNED_SHORT, indicesBuffer);
 		

@@ -48,6 +48,7 @@ public class CircleWave extends Mesh{
 		gl.glRotatef(rx, 1, 0, 0);
 		gl.glRotatef(ry, 0, 1, 0);
 		gl.glRotatef(rz, 0, 0, 1);
+		gl.glDisable(GL10.GL_TEXTURE_2D);
 		for (int i = 0; i < numCircles; i++){
 			outerRadii[i] += speed;
 			if (outerRadii[i] > maxRadius * (i + 1))
@@ -59,6 +60,7 @@ public class CircleWave extends Mesh{
 			gl.glPopMatrix();
 			
 		}
+		gl.glEnable(GL10.GL_TEXTURE_2D);
 	}
 
 }

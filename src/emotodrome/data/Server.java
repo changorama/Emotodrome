@@ -156,7 +156,7 @@ public class Server {
 						return 0;
 					}
 					else {
-						out.print(line);
+						out.print(line + "\n");
 					}
 				}
 			} catch (IOException e) {
