@@ -48,6 +48,7 @@ public class Run extends Activity {
 	private Button button;
 	private boolean spawnerToggle, shouldGetImage, shouldUpdateData;
 	private int updatedCount;
+	private boolean optionsVisible = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -137,6 +138,81 @@ public class Run extends Activity {
 	public void changeZoom(View view) {
 		backend.changeZoom();
 	}
+	
+	
+	public void toggleOptions(View view){
+		if (optionsVisible)
+			findViewById(R.id.optionSub1).setVisibility(View.GONE);
+		else
+			findViewById(R.id.optionSub1).setVisibility(View.VISIBLE);
+		optionsVisible = !optionsVisible;
+	}
+	
+	public void changeOption(View view){
+		Button option = (Button) view;
+		Button main = (Button) findViewById(R.id.optionMain);
+		CharSequence current = main.getText();
+		CharSequence newText = option.getText();
+		main.setText(newText);
+		option.setText(current);
+		toggleOptions(main);
+		
+		if (newText.equals("SPEED")){
+			setSpeedIcon();
+		}
+		else if (newText.equals("LOCATE")){
+			setLocateIcon();
+		}
+	}
+	
+	private void setLocateIcon() {
+		Button loc = (Button) findViewById(R.id.currentOption);
+		loc.setBackgroundResource(R.drawable.locate1);		
+	}
+
+	public void currentOptionClicked(View view){
+		Button main = (Button) findViewById(R.id.optionMain);
+		String current = main.getText().toString();
+		if (current.equals("SPEED")){
+			changeSpeed();
+		}
+		else if (current.equals("LOCATE")){
+			openGLRenderer.toggleLocating();
+		}
+	}
+	
+	private void changeSpeed(){
+		if (openGLRenderer.SPEED  == openGLRenderer.SPEED1)
+		{
+			openGLRenderer.SPEED = openGLRenderer.SPEED2;
+		}
+		else if (openGLRenderer.SPEED  == openGLRenderer.SPEED2)
+		{
+			openGLRenderer.SPEED = openGLRenderer.SPEED3;
+		}
+		else if (openGLRenderer.SPEED  == openGLRenderer.SPEED3)
+		{
+			openGLRenderer.SPEED = openGLRenderer.SPEED4;
+		}
+		else
+		{
+			openGLRenderer.SPEED = openGLRenderer.SPEED1;
+		}
+		setSpeedIcon();
+	}
+	
+	private void setSpeedIcon(){
+		Button speed = (Button) findViewById(R.id.currentOption);
+		if (openGLRenderer.SPEED  == openGLRenderer.SPEED2)
+			speed.setBackgroundResource(R.drawable.speed2);
+		else if (openGLRenderer.SPEED  == openGLRenderer.SPEED3)
+			speed.setBackgroundResource(R.drawable.speed3);
+		else if (openGLRenderer.SPEED  == openGLRenderer.SPEED4)
+			speed.setBackgroundResource(R.drawable.speed4);
+		else
+			speed.setBackgroundResource(R.drawable.speed1);
+	}
+	
 	/*
 	protected class NewImageUpdateThread extends AsyncTask<Integer, Void, Void> {
 		private int index;

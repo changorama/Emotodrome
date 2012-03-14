@@ -8,7 +8,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class Circle extends Mesh{
 	
-	private final int NUM_POINTS = 40;
+	private final int NUM_POINTS = 90;
 	private int lineWidth;
 	private float[] rgba;
 	private float initRadius;

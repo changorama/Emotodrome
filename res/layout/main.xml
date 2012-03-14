@@ -16,4 +16,36 @@
 	android:layout_width="fill_parent" 
 	android:layout_height="wrap_content"
 	/>
+
+<Button
+    android:id="@+id/optionMain"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentLeft="true"
+    android:layout_marginBottom="5dp"
+    android:background="@drawable/optiontab"
+    android:text="SPEED"
+    android:onClick="toggleOptions" />
+
+<Button
+    android:id="@+id/currentOption"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentRight="true"
+    android:layout_centerVertical="true"
+    android:background="@drawable/speed1"
+    android:onClick="currentOptionClicked" />
+
+<Button
+    android:id="@+id/optionSub1"
+    android:visibility="gone"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_above="@+id/optionMain"
+    android:layout_alignParentLeft="true"
+    android:background="@drawable/subtab"
+    android:onClick="changeOption"
+    android:text="LOCATE" />
+
 </RelativeLayout>

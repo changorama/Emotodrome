@@ -62,7 +62,9 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	
 	private HashMap<Integer, User> users;
 	private HashMap<Vec3, Float> iceData;
+	private boolean[][] currentIce;
 	private Group ice;
+	private Group closestIce;
 	/** Root instance */
 	private Group root;
 	private Group pyrite;
@@ -70,12 +72,15 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	//private Mesh map;
 	private Group sky;
 	private Mesh userAvatar;
-	
 	//private Mesh skyfront;
 	private final int NUMSHAPES = 10;
 	private final double SENSITIVITY = 0.5; // Sensitivity of motion controls.
 	//private boolean YAW = false; // Whether or not tilt controls yaw instead of roll.  I prefer roll.
-	
+	public final float SPEED1 = .05f;
+	public final float SPEED2 = .1f;
+	public final float SPEED3 = .15f;
+	public final float SPEED4 = .2f;
+	public float SPEED = .05f;
 	private final float skyHeight = 101f;
 	private final float skyDist = 2000f;
 	private final float MAPWIDTH = 200;
@@ -133,6 +138,8 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
     
 	/** The Activity Context */
 	private Context context;
+	
+	private Thread locateThread;
 	
 	/**
 	 * Instance the Cube0 object and set the Activity Context 
@@ -251,6 +258,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		users = new HashMap<Integer, User>();
 		iceData = backend.processIceData();
 		ice = new Group();
+		closestIce = new Group();
 		pyrite = new Group();
 		backend.listenUserUpdates(users);
 		
@@ -266,7 +274,15 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		userAvatar.y = camera.getEyeY();
 		userAvatar.z = camera.getEyeZ();
 		
+		currentIce = new boolean[181][361];
+		for (int i = 0; i < 181; i++){
+			for (int j = 0; j < 361; j++){
+				currentIce[i][j] = false;
+			}
+		}
+		
 		new Thread(new IceThread()).start();
+		locateThread = new Thread(new FindClosest());
 //		Circle c = new Circle(5, 100);
 //		c.y = 0;
 //		c.x = camera.getEyeX();
@@ -350,6 +366,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		
 		for (int i = 0; i < NUMMAPIMAGES; i++){
 			updateMapTextures(backend.getImagePath() + "/" + i + backend.getImageName(i), i);
+			System.out.println(backend.getImagePath() + "/" + i + backend.getImageName(i));
 		}
 		updateTexture = true;
 		//skyfront.loadGLTexture(gl, this.context, R.drawable.sky1);
@@ -380,7 +397,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			gl.glDisable(GL10.GL_LIGHTING);
 		}
 		
-		camera.moveCamera();
+		camera.moveCamera(SPEED);
 		if (camera.getMoveForward() == true){
 			backend.updateUserLocation(camera.getEye());
 		}
@@ -444,22 +461,22 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		//userAvatar.draw(gl);
 		//gl.glPopMatrix();
 		
-//		Collection<User> collection = users.values();
-//		gl.glPushMatrix();
-//		for (User user:collection){
-//			Mesh avatar = user.getUserAvatar();
-//			if (avatar == null){
-//				avatar = user.setUserAvatar(new Plane(1, 1));
-//				avatar.rx = 90;
-//				avatar.loadGLTexture(gl, context, R.drawable.avatar);
-//			}
-//			Vec3 userVector = user.getUserVector();
-//			avatar.x = userVector.x;
-//			avatar.y = userVector.y;
-//			avatar.z = userVector.z;
-//			user.draw(gl);
-//		}
-//		gl.glPopMatrix();
+		Collection<User> collection = users.values();
+		gl.glPushMatrix();
+		for (User user:collection){
+			Mesh avatar = user.getUserAvatar();
+			if (avatar == null){
+				avatar = user.setUserAvatar(new Plane(1, 1));
+				avatar.rx = 90;
+				avatar.loadGLTexture(gl, context, R.drawable.avatar);
+			}
+			Vec3 userVector = user.getUserVector();
+			avatar.x = userVector.x;
+			avatar.y = userVector.y;
+			avatar.z = userVector.z;
+			user.draw(gl);
+		}
+		gl.glPopMatrix();
 
 //		for (int i = (int) (camera.getEyeX()); i < camera.getEyeX() + 20; i++){
 //			for (int j = (int) camera.getEyeZ(); j < camera.getEyeZ() + 20; j++){
@@ -487,6 +504,10 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		
 		gl.glPushMatrix();
 		ice.draw(gl);
+		gl.glPopMatrix();
+		
+		gl.glPushMatrix();
+		closestIce.draw(gl);
 		gl.glPopMatrix();
 
 		//gl.glDisable(GL10.GL_TEXTURE_2D);
@@ -723,26 +744,67 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		return;
 	}
 	
+	public void toggleLocating(){
+		if (locateThread.isAlive()){
+			locateThread.stop();
+			if (closestIce.size() > 0){
+				closestIce.clear();
+			}
+		}
+		else {
+			locateThread.start();
+		}
+	}
+	
 	private class IceThread implements Runnable{
 
 		@Override
 		public void run() {
 			while (true){
 				Vec3 userLocation = camera.getEye();
-				for (int lat = -50; lat < 50; lat++){
-					for (int lon = -50; lon < 50; lon++){
-						Vec3 pos = new Vec3(userLocation.x + lat, 0, userLocation.z + lon);
+				for (int lat = -10; lat < 10; lat++){
+					for (int lon = 0; lon < 20; lon++){
+						Vec3 pos = new Vec3(Math.round(userLocation.x) + lat, 0, Math.round(userLocation.z) + lon);
 						Float iceValue = iceData.get(pos);
-						if (iceValue != null){
-							CircleWave c = new CircleWave(5, .01f, 1, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
+//						System.out.println(pos.x + "," + pos.z + "," + "ice: " + iceValue);
+						if (iceValue != null && !currentIce[lat + 90][lon]){
+							CircleWave c = new CircleWave((int) Math.ceil(iceValue/10), .01f, 1, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
 							c.x = pos.x;
 							c.z = pos.z;
 							c.y = 1;
 							ice.add(c);
+							currentIce[lat + 90][lon] = true;
 						}
 					}
 				}
 				
+			}
+			
+		}
+		
+	}
+	
+	private class FindClosest implements Runnable{
+
+		@Override
+		public void run() {
+			double mindist = 100000;
+			double dist;
+			Vec3 closest = null;
+			while (true){
+				Vec3 userLocation = camera.getEye();
+				for (int lat = -85; lat < 85; lat++){
+					for (int lon = 0; lon < 360; lon++){
+						Vec3 pos = new Vec3(lat, 0, lon);
+						if ((dist = pos.distance(userLocation)) < mindist && iceData.get(pos) != null){
+							mindist = dist;
+							closest = pos;
+							if (closestIce.size() > 0)
+								closestIce.remove(0);
+							closestIce.add(new LocatorLine(userLocation, closest));
+						}
+					}
+				}
 			}
 			
 		}

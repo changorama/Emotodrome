@@ -142,11 +142,7 @@ public class Cube extends Mesh implements Cloneable{
 	    	}
 	        
 	    setVertices(vertices);
-	    
-
-		//
 		//setTexture(texture);
-
         setNormals(vertnormals);
         setIndices(indices);
 

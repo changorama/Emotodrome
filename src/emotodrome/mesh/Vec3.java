@@ -4,7 +4,7 @@ package emotodrome.mesh;
  * 3D vector (can also be used to represent a 3d point).
  * @author fabio
  */
-public class Vec3 {
+public class Vec3{
 	/**
 	 * x coordinate.
 	 */
@@ -231,12 +231,13 @@ public class Vec3 {
         return new String("["+x+","+y+","+z+"]");
     }
     
-    public boolean equals(Vec3 v){
-    	return v.x == x && v.y == y && v.z == z; 
+    public boolean equals(Object v){
+    	return ((Vec3)v).x == x && ((Vec3)v).y == y && ((Vec3)v).z == z; 
     }
     
     public int hashCode(){
 		return (int) (x * 360 + z);
     	
     }
+
 }

@@ -8,7 +8,6 @@ public class Camera {
 	private Vec3 up;
 	private boolean move;
 	private float skyHeight = 101f;
-	private final float MOVE_SCALER = 0.05f;
 	private String rotatorP = "";
 	private String rotatorR = "";
 	
@@ -29,7 +28,7 @@ public class Camera {
 		this.persp = persp;
 		this.up = up;
 	}
-	public void moveCamera()
+	public void moveCamera(float speed)
 	{
 		double pitch = 0, roll = 0;
 		if(rotatorP.equals("") || rotatorR.equals(""))
@@ -73,7 +72,7 @@ public class Camera {
 		
 		if(move)
 		{
-			moveForward();
+			moveForward(speed);
 		}
 		
 		if(eye.y < 0)
@@ -90,14 +89,14 @@ public class Camera {
 		return;
 	}
 	
-	private void moveForward()
+	private void moveForward(float speed)
 	{
 		double scale = Math.sqrt(Math.pow(eye.x - persp.x, 2) + 
 				Math.pow(eye.y - persp.y, 2) + 
 				Math.pow(eye.z - persp.z, 2));
-		double movex = ((persp.x - eye.x) / scale) * MOVE_SCALER;
-		double movey = ((persp.y - eye.y) / scale) * MOVE_SCALER;
-		double movez = ((persp.z - eye.z) / scale) * MOVE_SCALER;
+		double movex = ((persp.x - eye.x) / scale) * speed;
+		double movey = ((persp.y - eye.y) / scale) * speed;
+		double movez = ((persp.z - eye.z) / scale) * speed;
 		
 		eye.x += movex;
 		persp.x += movex;
