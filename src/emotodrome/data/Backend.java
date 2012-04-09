@@ -37,10 +37,10 @@ public class Backend{
 	private final int IMAGE_HEIGHT = 256;
 	public double longitude;
 	public double latitude;
-	private double top;
-	private double bottom;
-	private double left;
-	private double right;
+	public double top;
+	public double bottom;
+	public double left;
+	public double right;
 	private Thread serverListener = null;
 
 	public Backend(Activity activity) {
@@ -50,10 +50,10 @@ public class Backend{
 		System.out.println("Initial Lat: " + locationManager.getLatitude());
 		System.out.println("Initial Long: " + locationManager.getLongitude());
 
-		if(Environment.getExternalStorageState() != null)
-			storage = Environment.getExternalStorageDirectory();
-		else
-			storage = Environment.getDataDirectory();
+		//if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
+		storage = Environment.getExternalStorageDirectory();
+//		else
+//			storage = Environment.getDataDirectory();
 
 
 		zoom = INIT_ZOOM;
@@ -73,17 +73,17 @@ public class Backend{
 		findLatitudeBounds();
 		findLongitudeBounds();
 		
-//		downloadImage(top, left, zoom, "0"+IMAGE_NAME, 0);
-//		downloadImage(top, longitude, zoom, "1"+IMAGE_NAME, 1);
-//		downloadImage(top, right, zoom, "2"+IMAGE_NAME, 2);
-//
-//		downloadImage(latitude, left, zoom, "3"+IMAGE_NAME, 3);
-//		downloadImage(latitude, longitude, zoom, "4"+IMAGE_NAME, 4);
-//		downloadImage(latitude, right, zoom, "5"+IMAGE_NAME, 5);
-//
-//		downloadImage(bottom, left, zoom, "6"+IMAGE_NAME, 6);
-//		downloadImage(bottom, longitude, zoom, "7"+IMAGE_NAME, 7);
-//		downloadImage(bottom, right, zoom, "8"+IMAGE_NAME, 8);
+		downloadImage(top, left, zoom, "0"+IMAGE_NAME, 0);
+		downloadImage(top, longitude, zoom, "1"+IMAGE_NAME, 1);
+		downloadImage(top, right, zoom, "2"+IMAGE_NAME, 2);
+
+		downloadImage(latitude, left, zoom, "3"+IMAGE_NAME, 3);
+		downloadImage(latitude, longitude, zoom, "4"+IMAGE_NAME, 4);
+		downloadImage(latitude, right, zoom, "5"+IMAGE_NAME, 5);
+
+		downloadImage(bottom, left, zoom, "6"+IMAGE_NAME, 6);
+		downloadImage(bottom, longitude, zoom, "7"+IMAGE_NAME, 7);
+		downloadImage(bottom, right, zoom, "8"+IMAGE_NAME, 8);
 
 		System.out.println("Return from image manager download.");
 
@@ -307,7 +307,7 @@ public class Backend{
 	public double getLatitude() {
 		return locationManager.getLatitude();
 	}
-
+	
 	public void queryServer() {
 		server.runServerLoop(locationManager.getLongitude(), locationManager.getLatitude());
 	}

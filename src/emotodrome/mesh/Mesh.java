@@ -251,6 +251,7 @@ public class Mesh implements Cloneable{
 
 	public void setTextureLocation(String textureLocation) {
 		this.textureLocation = textureLocation;
+		System.out.println("TEXTURE LOC:" + textureLocation);
 	}
 
 	public String getTextureLocation() {

@@ -225,8 +225,16 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		
 		//
 		mapgroup = new Group();
+		double latRange = backend.left - backend.right;
+		double latSize = Math.abs(latRange > 180 ? 360 - latRange : latRange)/MAPROWS;
+		double lonSize = Math.abs(backend.top - backend.bottom)/MAPCOLUMNS;
 		for (int i = 0; i < NUMMAPIMAGES; i++){
-			Plane p = new Plane(MAPWIDTH, MAPHEIGHT);
+			double potentialLeftBound = backend.left + latSize * (i%MAPROWS);
+			double leftBound = potentialLeftBound > 180 ? -360 + potentialLeftBound : potentialLeftBound;
+			double potentialRightBound = leftBound + latSize;
+			double rightBound = potentialRightBound > 180 ? -360 + potentialRightBound : potentialRightBound;
+			double topBound = backend.top - lonSize * (i/MAPCOLUMNS);
+			MapTile p = new MapTile(MAPWIDTH, MAPHEIGHT, (float) leftBound, (float) rightBound, (float) (topBound - lonSize), (float) topBound);
 			p.rz = -90;
 			p.rx = -90;
 			p.y = -1;
