@@ -225,16 +225,8 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		
 		//
 		mapgroup = new Group();
-		double latRange = backend.left - backend.right;
-		double latSize = Math.abs(latRange > 180 ? 360 - latRange : latRange)/MAPROWS;
-		double lonSize = Math.abs(backend.top - backend.bottom)/MAPCOLUMNS;
 		for (int i = 0; i < NUMMAPIMAGES; i++){
-			double potentialLeftBound = backend.left + latSize * (i%MAPROWS);
-			double leftBound = potentialLeftBound > 180 ? -360 + potentialLeftBound : potentialLeftBound;
-			double potentialRightBound = leftBound + latSize;
-			double rightBound = potentialRightBound > 180 ? -360 + potentialRightBound : potentialRightBound;
-			double topBound = backend.top - lonSize * (i/MAPCOLUMNS);
-			MapTile p = new MapTile(MAPWIDTH, MAPHEIGHT, (float) leftBound, (float) rightBound, (float) (topBound - lonSize), (float) topBound);
+			MapTile p = new MapTile(MAPWIDTH, MAPHEIGHT);
 			p.rz = -90;
 			p.rx = -90;
 			p.y = -1;
@@ -242,7 +234,8 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			p.x = (float) (-MAPWIDTH + MAPWIDTH * (i%MAPCOLUMNS) + backend.latitude);
 			mapgroup.add(i, p);
 		}
-
+		updateLatLonBounds();
+		
 		mapMoveForward = -MAPHEIGHT/2;
 		mapMoveBackward = MAPHEIGHT/2;
 		mapMoveRight = MAPWIDTH/2;
@@ -644,6 +637,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		sky.z -= MAPHEIGHT;
 		mapMoveBackward -= MAPHEIGHT;
 		updateTexture = true;
+		updateLatLonBounds();
 	}
 	
 	public void onMapMoveBackward(){
@@ -662,7 +656,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		sky.z += MAPHEIGHT;
 		mapMoveForward += MAPHEIGHT;
 		updateTexture = true;
-		
+		updateLatLonBounds();
 	}
 	
 	public void onMapMoveRight(){
@@ -683,6 +677,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		sky.x += MAPWIDTH;
 		mapMoveLeft += MAPWIDTH;
 		updateTexture = true;
+		updateLatLonBounds();
 	}
 	
 	public void onMapMoveLeft(){
@@ -703,9 +698,26 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		sky.x -= MAPWIDTH;
 		mapMoveRight -= MAPWIDTH;
 		updateTexture = true;
+		updateLatLonBounds();
 	}
 	
-	
+	private void updateLatLonBounds(){
+		double latRange = backend.left - backend.right;
+		double latSize = Math.abs(latRange > 180 ? 360 - latRange : latRange)/MAPROWS;
+		double lonSize = Math.abs(backend.top - backend.bottom)/MAPCOLUMNS;
+		double leftBound = backend.left;
+		for (int i = 0; i < NUMMAPIMAGES; i++){
+			double topBound = backend.top - lonSize * (i/MAPCOLUMNS);
+			MapTile m = (MapTile) mapgroup.get(i);
+			m.setWestLat((float) leftBound);
+			double potentialRightBound = leftBound + latSize;
+			double rightBound = leftBound + latSize > 180 ? -360 + potentialRightBound : potentialRightBound;
+			m.setEastLat((float) rightBound);
+			m.setNorthLon((float) topBound);
+			m.setSouthLon((float) (topBound - lonSize));
+			leftBound = rightBound;
+		}
+	}
 
 	@Override
 	public void onAccuracyChanged(Sensor arg0, int arg1) {
