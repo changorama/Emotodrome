@@ -780,25 +780,42 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 
 		@Override
 		public void run() {
-			while (true){
-				Vec3 userLocation = camera.getEye();
-				for (int lat = -10; lat < 10; lat++){
-					for (int lon = 0; lon < 20; lon++){
-						Vec3 pos = new Vec3(Math.round(userLocation.x) + lat, 0, Math.round(userLocation.z) + lon);
-						Float iceValue = iceData.get(pos);
-//						System.out.println(pos.x + "," + pos.z + "," + "ice: " + iceValue);
-						if (iceValue != null && !currentIce[lat + 90][lon]){
-							CircleWave c = new CircleWave((int) Math.ceil(iceValue/10), .01f, 1, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
-							c.x = pos.x;
-							c.z = pos.z;
-							c.y = 1;
-							ice.add(c);
-							currentIce[lat + 90][lon] = true;
-						}
+			for (int i = 0; i < NUMMAPIMAGES; i++){
+				MapTile m = (MapTile) mapgroup.get(i);
+				float east = m.getEastLat();
+				float west = m.getWestLat();
+				float north = m.getNorthLon();
+				float south = m.getSouthLon();
+				for (Vec3 pos : iceData.keySet()){
+					if (pos.x < east && pos.x > west && pos.z < north && pos.z > south){
+						float iceValue = iceData.get(pos);
+						CircleWave c = new CircleWave((int) Math.ceil(iceValue/10), .01f, 1, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
+						c.x = m.x;
+						c.z = m.z;
+						c.y = 1;
+						m.addIce(c);
 					}
 				}
-				
 			}
+//			while (true){
+//				Vec3 userLocation = camera.getEye();
+//				for (int lat = -10; lat < 10; lat++){
+//					for (int lon = 0; lon < 20; lon++){
+//						Vec3 pos = new Vec3(Math.round(userLocation.x) + lat, 0, Math.round(userLocation.z) + lon);
+//						Float iceValue = iceData.get(pos);
+////						System.out.println(pos.x + "," + pos.z + "," + "ice: " + iceValue);
+//						if (iceValue != null && !currentIce[lat + 90][lon]){
+//							CircleWave c = new CircleWave((int) Math.ceil(iceValue/10), .01f, 1, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
+//							c.x = pos.x;
+//							c.z = pos.z;
+//							c.y = 1;
+//							ice.add(c);
+//							currentIce[lat + 90][lon] = true;
+//						}
+//					}
+//				}
+//				
+//			}
 			
 		}
 		
