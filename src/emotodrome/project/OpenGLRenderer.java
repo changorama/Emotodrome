@@ -248,13 +248,13 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		sky.add(skytop);
 		
 		root = new Group();
-		for (int i = 0; i < NUMSHAPES; i++){
-			Mesh cube = new Cube(.5f, .5f, .5f);
-			cube.x = 0;
-			cube.y = 0;
-			cube.z = -i;
-			root.add(cube);	
-		}
+//		for (int i = 0; i < NUMSHAPES; i++){
+//			Mesh cube = new Cube(.5f, .5f, .5f);
+//			cube.x = 0;
+//			cube.y = 0;
+//			cube.z = -i;
+//			root.add(cube);	
+//		}
 		
 		users = new HashMap<Integer, User>();
 		iceData = backend.processIceData();
@@ -263,7 +263,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		pyrite = new Group();
 		backend.listenUserUpdates(users);
 		
-		r = new Random();
+		//r = new Random();
 		//pyrite = new Pyrite(.5f, .5f, .5f, r);
 		
 		//bezier = new AnchoredBezier(0, 0, 0, 0 , 1, 0, 20);
@@ -275,12 +275,12 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		userAvatar.y = camera.getEyeY();
 		userAvatar.z = camera.getEyeZ();
 		
-		currentIce = new boolean[181][361];
-		for (int i = 0; i < 181; i++){
-			for (int j = 0; j < 361; j++){
-				currentIce[i][j] = false;
-			}
-		}
+//		currentIce = new boolean[181][361];
+//		for (int i = 0; i < 181; i++){
+//			for (int j = 0; j < 361; j++){
+//				currentIce[i][j] = false;
+//			}
+//		}
 		
 		new Thread(new IceThread()).start();
 		locateThread = new Thread(new FindClosest());
@@ -638,6 +638,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		mapMoveBackward -= MAPHEIGHT;
 		updateTexture = true;
 		updateLatLonBounds();
+		new Thread(new IceThread()).start();
 	}
 	
 	public void onMapMoveBackward(){
@@ -657,6 +658,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		mapMoveForward += MAPHEIGHT;
 		updateTexture = true;
 		updateLatLonBounds();
+		new Thread(new IceThread()).start();
 	}
 	
 	public void onMapMoveRight(){
@@ -678,6 +680,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		mapMoveLeft += MAPWIDTH;
 		updateTexture = true;
 		updateLatLonBounds();
+		new Thread(new IceThread()).start();
 	}
 	
 	public void onMapMoveLeft(){
@@ -699,6 +702,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		mapMoveRight -= MAPWIDTH;
 		updateTexture = true;
 		updateLatLonBounds();
+		new Thread(new IceThread()).start();
 	}
 	
 	private void updateLatLonBounds(){
@@ -711,11 +715,11 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			MapTile m = (MapTile) mapgroup.get(i);
 			m.setWestLat((float) leftBound);
 			double potentialRightBound = leftBound + latSize;
-			double rightBound = leftBound + latSize > 180 ? -360 + potentialRightBound : potentialRightBound;
+			double rightBound = (leftBound + latSize) > 180 ? (-360 + potentialRightBound) : potentialRightBound;
 			m.setEastLat((float) rightBound);
 			m.setNorthLon((float) topBound);
 			m.setSouthLon((float) (topBound - lonSize));
-			leftBound = rightBound;
+			leftBound = i%3 < 2 ? rightBound : backend.left;
 		}
 	}
 

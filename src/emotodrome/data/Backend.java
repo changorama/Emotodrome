@@ -117,6 +117,7 @@ public class Backend{
 				if (icePercentage > 0){
 					icePercents.put(new Vec3(lat, 0, lon), icePercentage);
 				}
+				System.out.println(lat + ", " + lon + " processed");
 			}
 			return icePercents;
 		} catch (FileNotFoundException e) {
