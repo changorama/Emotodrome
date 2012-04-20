@@ -31,77 +31,51 @@ import android.view.TouchDelegate;
 import android.view.GestureDetector.OnGestureListener;
 
 /**
- * This is a port of the {@link http://nehe.gamedev.net} OpenGL 
- * tutorials to the Android 1.5 OpenGL ES platform. Thanks to 
- * NeHe and all contributors for their great tutorials and great 
- * documentation. This source should be used together with the
- * textual explanations made at {@link http://nehe.gamedev.net}.
- * The code is based on the original Visual C++ code with all
- * comments made. It has been altered and extended to meet the
- * Android requirements. The Java code has according comments.
+ * This class handles the rendering of the opengl window.
  * 
- * If you use this code or find it helpful, please visit and send
- * a shout to the author under {@link http://www.insanitydesign.com/}
- * 
- * @DISCLAIMER
- * This source and the whole package comes without warranty. It may or may
- * not harm your computer or cell phone. Please use with care. Any damage
- * cannot be related back to the author. The source has been tested on a
- * virtual environment and scanned for viruses and has passed all tests.
- * 
- * 
- * This is an interpretation of "Lesson 07: Texture Mapping"
- * for the Google Android platform.
- * 
- * @author Savas Ziplies (nea/INsanityDesign)
+ * @author Luke Fowlie
  */
 public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventListener {
 	public GL10 mygl;
-	
+
 	private Backend backend;
 	
-	private HashMap<Integer, User> users;
-	private HashMap<Vec3, Float> iceData;
-	private boolean[][] currentIce;
-	private Group ice;
-	private Group closestIce;
-	/** Root instance */
-	private Group root;
-	private Group pyrite;
-	private AnchoredBezier bezier;
-	//private Mesh map;
-	private Group sky;
+	private HashMap<Integer, User> users;	//keys are user ids that map to a user currently connected to the server
+	private HashMap<Vec3, Float> iceData; 	//keys are a vector representing the lat/lon location of the ice and map to a float representing the amount of ice at this location
+	private Group ice;  					//holds the meshes that represent ice data
+	private Group closestIce;				//holds locator lines
+	private Group sky;  					//holds meshes used to draw sky
 	private Mesh userAvatar;
-	//private Mesh skyfront;
-	private final int NUMSHAPES = 10;
 	private final double SENSITIVITY = 0.5; // Sensitivity of motion controls.
-	//private boolean YAW = false; // Whether or not tilt controls yaw instead of roll.  I prefer roll.
-	public final float SPEED1 = .05f;
+	public final float SPEED1 = .05f;  		//movement speed options
 	public final float SPEED2 = .1f;
 	public final float SPEED3 = .15f;
 	public final float SPEED4 = .2f;
-	public float SPEED = .05f;
-	private final float skyHeight = 101f;
-	private final float skyDist = 2000f;
-	private final float MAPWIDTH = 200;
-	private final float MAPHEIGHT = 200;
-	private final int MAPROWS = 3;
-	private final int MAPCOLUMNS = 3;
-	private float mapMoveForward;
+	public float speed = .05f; 				//holds current speed
+	private final float skyHeight = 101f;  	//y value of the sky
+	private final float skyDist = 2000f;  	//how far the sky stretches in the distance
+	private final float MAPWIDTH = 200;  	//width of a map tile
+	private final float MAPHEIGHT = 200;	//length of a map tile
+	private final int MAPROWS = 3;			//number of map tiles lined up parallel to the x axis
+	private final int MAPCOLUMNS = 3;		//number of map tiles lined up parallel to z axis
+	
+	/*if users x location is greater than mapMoveForward, the map tiles will all shift forward one tile, 
+	 * similarly for the rest of these mapMove variables
+	 */
+	private float mapMoveForward;			
 	private float mapMoveBackward;
 	private float mapMoveRight;
 	private float mapMoveLeft;
 	
 	public final int NUMMAPIMAGES = MAPROWS * MAPCOLUMNS;
-	private boolean updateTexture = false;
-	private Group mapgroup;
+	private boolean updateTexture = false;	//holds whether a map texture should be updated
+	private Group mapgroup;					//holds meshes used to draw the map
 	
-	/** Is light enabled ( NEW ) */
-	private boolean light = true;
+	private boolean light = true;			//is light enabled
 
 	/* 
 	 * The initial light values for ambient and diffuse
-	 * as well as the light position ( NEW ) 
+	 * as well as the light position 
 	 */
 	private float[] lightAmbient = {0.5f, 0.5f, 0.5f, 1.0f};
 	private float[] lightDiffuse = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -116,7 +90,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	private float[] fogColor = {.7098f, .8156f, .8196f};
 	
 	private float[] gravity = null;
-	/* The buffers for our light values ( NEW ) */
+	/* The buffers for our light values */
 	private FloatBuffer lightAmbientBuffer;
 	private FloatBuffer lightDiffuseBuffer;
 	private FloatBuffer lightSpecularBuffer;
@@ -125,13 +99,10 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	private FloatBuffer light2PositionBuffer;
 	private FloatBuffer fogColorBuffer;
 	
-	private float moveBezier = 0.0f;
-	
 	Random r;
 	
-    private GestureDetector detector;
-    
-    private SensorManager sensorManager = null;
+    private GestureDetector detector;			//senses touch events   
+    private SensorManager sensorManager = null; //used for accelerometer readings
     private Sensor sensor = null;
 	
     private Camera camera;
@@ -142,16 +113,15 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	private Thread locateThread;
 	
 	/**
-	 * Instance the Cube0 object and set the Activity Context 
-	 * handed over. Initiate the light buffers and set this 
-	 * class as renderer for this now GLSurfaceView.
-	 * Request Focus and set if focusable in touch mode to
-	 * receive the Input from Screen and Buttons  
-	 * 
-	 * @param context - The Activity Context
+	 * constructor initializes the view we will render in, sets up sensors we will use, initializes our light/fog buffers, and initializes 
+	 * all objects that will be drawn initially
+	 * @param context - The Activity Context, view - the view to render in, backend - the backend object that handles server communication
 	 */
 	public OpenGLRenderer(Context context, GLSurfaceView view, Backend backend) {
-		//super(context);
+		
+		this.context = context;		
+		this.backend = backend;
+		
 		Rect bounds = new Rect();
 		view.getHitRect(bounds);
 		view.setTouchDelegate(new TouchDelegate(bounds, view){
@@ -168,19 +138,14 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		view.requestFocus();
 		view.setFocusableInTouchMode(true);
 		
-		
-		//
-		this.context = context;		
-		this.backend = backend;
-		
-        detector = new GestureDetector(this);
+        detector = new GestureDetector(this);	
         
         //Accelerometer stuff.
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME);
         
-		//
+		//initialize light buffers
 		ByteBuffer byteBuf = ByteBuffer.allocateDirect(lightAmbient.length * 4);
 		byteBuf.order(ByteOrder.nativeOrder());
 		lightAmbientBuffer = byteBuf.asFloatBuffer();
@@ -223,7 +188,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		fogColorBuffer.put(fogColor);
 		fogColorBuffer.position(0);
 		
-		//
+		//initialize maps
 		mapgroup = new Group();
 		for (int i = 0; i < NUMMAPIMAGES; i++){
 			MapTile p = new MapTile(MAPWIDTH, MAPHEIGHT);
@@ -241,74 +206,28 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		mapMoveRight = MAPWIDTH/2;
 		mapMoveLeft = -MAPWIDTH/2;
 		
+		//initialize sky
 		Mesh skytop = new Plane(skyDist, skyDist, 5, 5);
 		skytop.rx = 90;
 		skytop.y = skyHeight;
 		sky = new Group();
 		sky.add(skytop);
 		
-		root = new Group();
-//		for (int i = 0; i < NUMSHAPES; i++){
-//			Mesh cube = new Cube(.5f, .5f, .5f);
-//			cube.x = 0;
-//			cube.y = 0;
-//			cube.z = -i;
-//			root.add(cube);	
-//		}
-		
 		users = new HashMap<Integer, User>();
-		iceData = backend.processIceData();
+		iceData = backend.processIceData();		//process ice data so we can draw it
 		ice = new Group();
 		closestIce = new Group();
-		pyrite = new Group();
-		backend.listenUserUpdates(users);
-		
-		//r = new Random();
-		//pyrite = new Pyrite(.5f, .5f, .5f, r);
-		
-		//bezier = new AnchoredBezier(0, 0, 0, 0 , 1, 0, 20);
+		backend.listenUserUpdates(users);		//begin listening for location updates from other users
 
-		//camera = new Camera(new Vec3((float) backend.longitude, 0f, (float)backend.latitude));
 		camera = new Camera(new Vec3(0f, 0f, 0f));
 		userAvatar = new Cube(1f, 1f, 1f);
 		userAvatar.x = camera.getEyeX();
 		userAvatar.y = camera.getEyeY();
 		userAvatar.z = camera.getEyeZ();
 		
-//		currentIce = new boolean[181][361];
-//		for (int i = 0; i < 181; i++){
-//			for (int j = 0; j < 361; j++){
-//				currentIce[i][j] = false;
-//			}
-//		}
-		
 		new Thread(new IceThread()).start();
 		locateThread = new Thread(new FindClosest());
-//		Circle c = new Circle(5, 100);
-//		c.y = 0;
-//		c.x = camera.getEyeX();
-//		c.z = camera.getEyeZ() -1;
-//		for (int i = 0; i < 70; i++){
-////			for (int j = 0; j < 30; j++) {
-//				CircleWave c = new CircleWave(5, .01f, 1, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
-////				Circle c = new Circle(1, .1f, 1, new float[]{0, 1, 0, 1});
-//				c.z = -5 * i;
-////				c.x = 1*j;
-////				c.y = 1;
-//				ice.add(c);
-////			}
-//		}
 		
-//		ice = new TriangleOrigami[170][360];
-//		for (int i = 0; i < 170; i++){
-//			for (int j = 0; j < 360; j++){
-//				if (iceData[i][j] > 0){
-//					TriangleOrigami t = new TriangleOrigami(new Vec3(i, 0, j), new Vec3(1, 1, 1), new Vec3(-1, 1, -1), r);
-//					ice[i][j] = t;
-//					
-//				}
-//			}
-//		}
 		
 //		new Thread(new Runnable(){
 //			@Override
@@ -322,7 +241,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 //				removeIce();
 //			}
 //		}).start();
-		System.out.println("done");
+		System.out.println("renderer setup done");
 	}
 
 	/**
@@ -330,21 +249,20 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	 */
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		mygl = gl;
-		//And there'll be light!
-		gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_AMBIENT, lightAmbientBuffer);		//Setup The Ambient Light ( NEW )
-		gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_DIFFUSE, lightDiffuseBuffer);		//Setup The Diffuse Light ( NEW )
+		gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_AMBIENT, lightAmbientBuffer);		//Setup The Ambient Light
+		gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_DIFFUSE, lightDiffuseBuffer);		//Setup The Diffuse Light
 		gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_SPECULAR, lightSpecularBuffer);
-		gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_POSITION, lightPositionBuffer);	//Position The Light ( NEW )
-		gl.glEnable(GL10.GL_LIGHT0);											//Enable Light 0 ( NEW )
+		gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_POSITION, lightPositionBuffer);	//Position The Light
+		gl.glEnable(GL10.GL_LIGHT0);											//Enable Light 0
 
-		gl.glLightfv(GL10.GL_LIGHT1, GL10.GL_AMBIENT, lightAmbientBuffer);		//Setup The Ambient Light ( NEW )
-		gl.glLightfv(GL10.GL_LIGHT1, GL10.GL_DIFFUSE, lightDiffuseBuffer);		//Setup The Diffuse Light ( NEW )
-		gl.glLightfv(GL10.GL_LIGHT1, GL10.GL_POSITION, light1PositionBuffer);	//Position The Light ( NEW )
+		gl.glLightfv(GL10.GL_LIGHT1, GL10.GL_AMBIENT, lightAmbientBuffer);		//Setup The Ambient Light
+		gl.glLightfv(GL10.GL_LIGHT1, GL10.GL_DIFFUSE, lightDiffuseBuffer);		//Setup The Diffuse Light
+		gl.glLightfv(GL10.GL_LIGHT1, GL10.GL_POSITION, light1PositionBuffer);	//Position The Light
 		gl.glEnable(GL10.GL_LIGHT1);
 		
-		gl.glLightfv(GL10.GL_LIGHT2, GL10.GL_AMBIENT, lightAmbientBuffer);		//Setup The Ambient Light ( NEW )
-		gl.glLightfv(GL10.GL_LIGHT2, GL10.GL_DIFFUSE, lightDiffuseBuffer);		//Setup The Diffuse Light ( NEW )
-		gl.glLightfv(GL10.GL_LIGHT2, GL10.GL_POSITION, light2PositionBuffer);	//Position The Light ( NEW )
+		gl.glLightfv(GL10.GL_LIGHT2, GL10.GL_AMBIENT, lightAmbientBuffer);		//Setup The Ambient Light
+		gl.glLightfv(GL10.GL_LIGHT2, GL10.GL_DIFFUSE, lightDiffuseBuffer);		//Setup The Diffuse Light
+		gl.glLightfv(GL10.GL_LIGHT2, GL10.GL_POSITION, light2PositionBuffer);	//Position The Light
 		gl.glEnable(GL10.GL_LIGHT2);
 
 		//Settings
@@ -362,28 +280,30 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		gl.glFogf(GL10.GL_FOG_START, 50f);
 		gl.glFogf(GL10.GL_FOG_END, 300f);
 		
-		//Really Nice Perspective Calculations
+		//nicest perspective calculations
 		gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST); 
 		
+		//get images from backend for maps
 		for (int i = 0; i < NUMMAPIMAGES; i++){
 			updateMapTextures(backend.getImagePath() + "/" + i + backend.getImageName(i), i);
 			System.out.println(backend.getImagePath() + "/" + i + backend.getImageName(i));
 		}
-		updateTexture = true;
-		//skyfront.loadGLTexture(gl, this.context, R.drawable.sky1);
+		updateTexture = true; //set textures to be updated
+		
+		//load sky texture
 		for (int i = 0; i < sky.size(); i++){
 			sky.get(i).loadGLTexture(gl, this.context, R.drawable.sky1);
-		}
-		
-		
+		}	
 	}
 
 	
 	public void updateMapTextures(String loc, int index){
 		mapgroup.get(index).setTextureLocation(loc);
 	}
+	
 	/**
-	 * Here we do our drawing
+	 * this function draws everything, looping continuously during execution of the program. any heavy calculations should be done 
+	 * in a separate thread
 	 */
 	public void onDrawFrame(GL10 gl) {
 		
@@ -398,14 +318,15 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			gl.glDisable(GL10.GL_LIGHTING);
 		}
 		
-		camera.moveCamera(SPEED);
+		camera.moveCamera(speed);													//move camera
 		if (camera.getMoveForward() == true){
-			backend.updateUserLocation(camera.getEye());
+			backend.updateUserLocation(camera.getEye());							//if we have moved, update the server
 		}
-		GLU.gluLookAt(gl, camera.getEyeX(), camera.getEyeY(), camera.getEyeZ(), 
+		GLU.gluLookAt(gl, camera.getEyeX(), camera.getEyeY(), camera.getEyeZ(), 	//defines where the camera is looking
 				camera.getPerspX(), camera.getPerspY(), camera.getPerspZ(),
 				camera.getUpX(), camera.getUpY(), camera.getUpZ());
 		
+		//check if we should be moving map tiles, thread this action if so
 		if (camera.getEyeZ() < mapMoveForward){
 			mapMoveForward -= MAPHEIGHT;
 			new Thread(new Runnable(){
@@ -446,6 +367,8 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 				
 			}).start();
 		}
+		
+		//if we need to update our map textures, do so
 		if (updateTexture){
 			for (int i=0; i < NUMMAPIMAGES; i++){
 				Plane p = (Plane) mapgroup.get(i);
@@ -462,6 +385,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		//userAvatar.draw(gl);
 		//gl.glPopMatrix();
 		
+		//draw other users avatars
 		Collection<User> collection = users.values();
 		gl.glPushMatrix();
 		for (User user:collection){
@@ -495,6 +419,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 //		}
 //		gl.glEnable(GL10.GL_TEXTURE_2D);
 		
+		//draw our meshes
 		gl.glPushMatrix();
 		mapgroup.draw(gl);
 		gl.glPopMatrix();
@@ -522,58 +447,49 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 //			gl.glPopMatrix();
 //			
 //		}
-//		gl.glPushMatrix();
-//		pyrite.draw(gl);
-//		gl.glPopMatrix();
-		
-		//gl.glPushMatrix();
-		//moveBezier += .01;
-		//bezier.x = moveBezier;
-		//bezier.draw(gl);
-		//gl.glPopMatrix();
 		
 		//gl.glEnable(GL10.GL_TEXTURE_2D);
 	}		
 
-	private synchronized void addIce() {
-		while (true){
-			Queue<LocationValuePair> add = backend.getIceToAdd();
-			if (add != null){
-				LocationValuePair lvp;
-				while ((lvp = add.poll()) != null && ice.size() < 10){
-					Vec3 loc = lvp.getLocation();
-					float size = lvp.getValue()/200;
-					TriangleOrigami t = new TriangleOrigami(new Vec3(loc.x, 0, loc.z), new Vec3(loc.x + size, 2 * size, loc.z + size), new Vec3(loc.x - size, 2 * size, loc.z - size), new Random());
-					t.setId(loc);
-					ice.add(t);
-				}
-			}
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private synchronized void removeIce() {
-		while(true){
-			Queue<Vec3> remove = backend.getIceToRemove();
-			Vec3 id;
-			while ((id = remove.poll()) != null){
-				for (int i = 0; i < ice.size(); i++){
-					if (((TriangleOrigami) ice.get(i)).getId().equals(id)){
-						ice.remove(i);
-					}
-				}
-			}
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+//	private synchronized void addIce() {
+//		while (true){
+//			Queue<LocationValuePair> add = backend.getIceToAdd();
+//			if (add != null){
+//				LocationValuePair lvp;
+//				while ((lvp = add.poll()) != null && ice.size() < 10){
+//					Vec3 loc = lvp.getLocation();
+//					float size = lvp.getValue()/200;
+//					TriangleOrigami t = new TriangleOrigami(new Vec3(loc.x, 0, loc.z), new Vec3(loc.x + size, 2 * size, loc.z + size), new Vec3(loc.x - size, 2 * size, loc.z - size), new Random());
+//					t.setId(loc);
+//					ice.add(t);
+//				}
+//			}
+//			try {
+//				Thread.sleep(100);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//	}
+//
+//	private synchronized void removeIce() {
+//		while(true){
+//			Queue<Vec3> remove = backend.getIceToRemove();
+//			Vec3 id;
+//			while ((id = remove.poll()) != null){
+//				for (int i = 0; i < ice.size(); i++){
+//					if (((TriangleOrigami) ice.get(i)).getId().equals(id)){
+//						ice.remove(i);
+//					}
+//				}
+//			}
+//			try {
+//				Thread.sleep(100);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//	}
 	/**
 	 * If the surface changes, reset the view
 	 */
@@ -592,20 +508,27 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		gl.glLoadIdentity(); 					//Reset The Modelview Matrix
 	}
 	
+	//detects press event, moves camera forward
 	@Override
 	public boolean onDown(MotionEvent arg0) {
 		camera.setMoveForward(true);
 		return true;
 	}
+	
+	//detects fling event
 	@Override
 	public boolean onFling(MotionEvent arg0, MotionEvent arg1, float arg2,
 			float arg3) {
 		return false;
 	}
+	
+	//detects long press event
 	@Override
 	public void onLongPress(MotionEvent arg0) {
 		
 	}
+	
+	//detects scroll event
 	@Override
 	public boolean onScroll(MotionEvent arg0, MotionEvent arg1, float arg2,
 			float arg3) {
@@ -616,11 +539,13 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		
 	}
 
+	//detects a tap, stops camera moving
 	public boolean onSingleTapUp(MotionEvent arg0) {
 		camera.setMoveForward(false);
 		return false;
 	}
 	
+	//move back tiles to the front
 	public void onMapMoveForward(){
 		backend.updateAvatarLocation(Backend.MOVE_FORWARD);
 		for (int i = NUMMAPIMAGES - 1; i > NUMMAPIMAGES - MAPCOLUMNS - 1; i--){
@@ -641,6 +566,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		new Thread(new IceThread()).start();
 	}
 	
+	//move front tiles to the back
 	public void onMapMoveBackward(){
 		backend.updateAvatarLocation(Backend.MOVE_BACKWARD);
 		for (int i = 0; i < MAPCOLUMNS; i++){
@@ -661,6 +587,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		new Thread(new IceThread()).start();
 	}
 	
+	//move left tiles to the right
 	public void onMapMoveRight(){
 		backend.updateAvatarLocation(Backend.MOVE_RIGHT);
 		for (int i = 0; i < MAPROWS; i++){
@@ -683,6 +610,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		new Thread(new IceThread()).start();
 	}
 	
+	//move right tiles to the left
 	public void onMapMoveLeft(){
 		backend.updateAvatarLocation(Backend.MOVE_LEFT);
 		for (int i = MAPROWS; i > 0; i--){
@@ -705,6 +633,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		new Thread(new IceThread()).start();
 	}
 	
+	//update the latitude and longitudes of all our map tiles
 	private void updateLatLonBounds(){
 		double latRange = backend.left - backend.right;
 		double latSize = Math.abs(latRange > 180 ? 360 - latRange : latRange)/MAPROWS;
@@ -728,6 +657,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		
 	}
 
+	//handles accelerometer events
 	@Override
 	public void onSensorChanged(SensorEvent event) 
 	{
@@ -768,6 +698,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		return;
 	}
 	
+	//starts/stops the locate thread
 	public void toggleLocating(){
 		if (locateThread.isAlive()){
 			locateThread.stop();
@@ -780,6 +711,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		}
 	}
 	
+	//handles determining where we should be drawing ice and what it should look like
 	private class IceThread implements Runnable{
 
 		@Override
@@ -793,7 +725,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 				for (Vec3 pos : iceData.keySet()){
 					if (pos.x < east && pos.x > west && pos.z < north && pos.z > south){
 						float iceValue = iceData.get(pos);
-						CircleWave c = new CircleWave((int) Math.ceil(iceValue/10), .01f, 1, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
+						CircleWave c = new CircleWave((int) Math.ceil(iceValue/10), .01f, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
 						c.x = m.x;
 						c.z = m.z;
 						c.y = 1;
@@ -825,6 +757,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		
 	}
 	
+	//thread to find the closest ice point
 	private class FindClosest implements Runnable{
 
 		@Override

@@ -9,24 +9,21 @@ import javax.microedition.khronos.opengles.GL10;
 public class Circle extends Mesh{
 	
 	private final int NUM_POINTS = 90;
-	private int lineWidth;
 	private float[] rgba;
 	private float initRadius;
 	private float scale;
 
     /**
-     * The value of step will define the size of each facet as well as the number of facets
-     *  
-     * @param outerRadius
-     * @param step
+     * @param outerRadius - the radius of the outer circle
+     * @param innerRadius - the radius of the inner circle
+     * 
      */
 
-    public Circle(float outerRadius, float innerRadius, int lineWidth, float[] rgba) {
+    public Circle(float outerRadius, float innerRadius, float[] rgba) {
     	float[] vertices = new float[2 * NUM_POINTS * 3];
     	short[] indices = new short[NUM_POINTS * 4 + 1];
     	float[] normals = new float[NUM_POINTS * 6];
     	//verticesBuffer = ByteBuffer.allocateDirect(2 * NUM_POINTS * 3 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer(); 
-    	this.lineWidth = lineWidth;
     	for (int i = 0; i < NUM_POINTS * 6; i += 6) {
     		vertices[i] = (float) Math.cos(Math.PI * i * (360/NUM_POINTS) / 180) * outerRadius;
     	    vertices[i+1] = 0f;

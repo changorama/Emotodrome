@@ -2,14 +2,18 @@ package emotodrome.user;
 
 import emotodrome.mesh.Vec3;
 
+
+/**
+ * Class to handle camera movement and hold camera values
+ */
 public class Camera {
-	private Vec3 eye;
-	private Vec3 persp;
-	private Vec3 up;
-	private boolean move;
-	private float skyHeight = 101f;
-	private String rotatorP = "";
-	private String rotatorR = "";
+	private Vec3 eye;				//position vector of camera
+	private Vec3 persp;				//perspective vector of camera
+	private Vec3 up;				//up vector of camera
+	private boolean move;			//are we moving
+	private float skyHeight = 101f;	//max height we can fly to
+	private String rotatorP = "";	//up and down turning
+	private String rotatorR = "";	//right and left turning
 	
 	public Camera(){
 		eye = new Vec3(0, 0, 1);
@@ -28,6 +32,8 @@ public class Camera {
 		this.persp = persp;
 		this.up = up;
 	}
+	
+	//handles camera movement
 	public void moveCamera(float speed)
 	{
 		double pitch = 0, roll = 0;
@@ -89,6 +95,7 @@ public class Camera {
 		return;
 	}
 	
+	//move the camera forward one unit
 	private void moveForward(float speed)
 	{
 		double scale = Math.sqrt(Math.pow(eye.x - persp.x, 2) + 
@@ -106,6 +113,7 @@ public class Camera {
 		persp.z += movez;
 	}
 	
+	//turn the camera in its current plane
 	private void turnYaw(double roll)
 	{
 		// Up cross focus for left vector
@@ -123,6 +131,7 @@ public class Camera {
 		persp = persp.normalize();
 	}
 	
+	//roll the camera, keeping it pointed in the same direction
 	private void turnRoll(double roll)
 	{
 		
@@ -142,6 +151,7 @@ public class Camera {
 
 	}
 	
+	//pitch camera up or down
 	private void turnPitch(double pitch)
 	{
 		Vec3 oldup = new Vec3(up.x, up.y, up.z);

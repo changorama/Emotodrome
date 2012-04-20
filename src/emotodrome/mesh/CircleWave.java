@@ -12,12 +12,24 @@ public class CircleWave extends Mesh{
 	private float[] innerRadii;
 	private float maxRadius;
 	private float minRadius;
-	private int thickness;
 	private float spacing;
 	private float[][] colors;
 	private float[] heights;
 	
-	public CircleWave(int numCircles, float speed, int thickness, float minOuterRadius, float maxOuterRadius, float minInnerRadius, float maxInnerRadius, float spacing, float minY, float maxY, float[] colorMin, float[] colorMax){
+	/**
+	 * @param numCircles - number of circles in this wave
+	 * @param speed - the speed at which the circles move outward
+	 * @param minOuterRadius - the smallest radius possible for the outer edge of each circle
+	 * @param maxOuterRadius - the largest radius possible for the outer edge of each circle
+	 * @param minInnerRadius - the smallest radius possible for the inner edge of each circle
+	 * @param maxInnerRadius - the largest radius possible for the inner edge of each circle
+	 * @param spacing - space between each circle
+	 * @param minY - minimum height of a circle
+	 * @param maxY - maximum height of a circle
+	 * @param colorMin - one end of the color spectrum these circles will be drawn with
+	 * @param colorMax - other end of color spectrum
+	 */
+	public CircleWave(int numCircles, float speed, float minOuterRadius, float maxOuterRadius, float minInnerRadius, float maxInnerRadius, float spacing, float minY, float maxY, float[] colorMin, float[] colorMax){
 		this.dR = ((maxOuterRadius - minOuterRadius)/numCircles);
 		this.numCircles = numCircles;
 		this.speed = speed;
@@ -36,7 +48,7 @@ public class CircleWave extends Mesh{
 			colors[i][1] = (float) (Math.random() * (colorMax[1] - colorMin[1]) + colorMin[1]);
 			colors[i][2] = (float) (Math.random() * (colorMax[2] - colorMin[2]) + colorMin[2]);
 			colors[i][3] = (float) (Math.random() * (colorMax[3] - colorMin[3]) + colorMin[3]);
-			Circle c = new Circle(outerRadii[i], innerRadii[i], thickness, colors[i]);
+			Circle c = new Circle(outerRadii[i], innerRadii[i], colors[i]);
 			heights[i] = (float) Math.random() * (maxY - minY) + minY;
 			c.y = heights[i];
 			circles.add(i, c);

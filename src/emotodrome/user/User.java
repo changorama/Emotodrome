@@ -5,6 +5,9 @@ import javax.microedition.khronos.opengles.GL10;
 import emotodrome.mesh.Mesh;
 import emotodrome.mesh.Vec3;
 
+/**
+ * Class to hold the user's position and the avatar that will represent that user
+ */
 public class User {
 
 	private Vec3 userVector;

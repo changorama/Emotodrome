@@ -44,7 +44,6 @@ public class Run extends Activity {
 	private OpenGLRenderer openGLRenderer;
 	private Backend backend; 
 	private TextView textView;	
-	//private ImageView imageView;
 	private Button button;
 	private boolean spawnerToggle, shouldGetImage, shouldUpdateData;
 	private int updatedCount;
@@ -103,7 +102,7 @@ public class Run extends Activity {
 	
 	protected void onDestroy(){
 		try {
-			backend.closeConnections();
+			backend.closeConnections();			//if application is closed, close connections to server
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -120,12 +119,14 @@ public class Run extends Activity {
 		//openGLRenderer.onPause();
 	}
 	
+	//create options menu
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.menu, menu);
 	    return true;
 	}
 	
+	//called when options item is clicked
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection	
@@ -148,6 +149,7 @@ public class Run extends Activity {
 		optionsVisible = !optionsVisible;
 	}
 	
+	//handles press on the main option button
 	public void changeOption(View view){
 		Button option = (Button) view;
 		Button main = (Button) findViewById(R.id.optionMain);
@@ -165,11 +167,13 @@ public class Run extends Activity {
 		}
 	}
 	
+	//add locate icon to the screen
 	private void setLocateIcon() {
 		Button loc = (Button) findViewById(R.id.currentOption);
 		loc.setBackgroundResource(R.drawable.locate1);		
 	}
 
+	//handles click on a side tab
 	public void currentOptionClicked(View view){
 		Button main = (Button) findViewById(R.id.optionMain);
 		String current = main.getText().toString();
@@ -181,33 +185,35 @@ public class Run extends Activity {
 		}
 	}
 	
+	//increase speed unless we are at max speed, in which case go back to first speed
 	private void changeSpeed(){
-		if (openGLRenderer.SPEED  == openGLRenderer.SPEED1)
+		if (openGLRenderer.speed  == openGLRenderer.SPEED1)
 		{
-			openGLRenderer.SPEED = openGLRenderer.SPEED2;
+			openGLRenderer.speed = openGLRenderer.SPEED2;
 		}
-		else if (openGLRenderer.SPEED  == openGLRenderer.SPEED2)
+		else if (openGLRenderer.speed  == openGLRenderer.SPEED2)
 		{
-			openGLRenderer.SPEED = openGLRenderer.SPEED3;
+			openGLRenderer.speed = openGLRenderer.SPEED3;
 		}
-		else if (openGLRenderer.SPEED  == openGLRenderer.SPEED3)
+		else if (openGLRenderer.speed  == openGLRenderer.SPEED3)
 		{
-			openGLRenderer.SPEED = openGLRenderer.SPEED4;
+			openGLRenderer.speed = openGLRenderer.SPEED4;
 		}
 		else
 		{
-			openGLRenderer.SPEED = openGLRenderer.SPEED1;
+			openGLRenderer.speed = openGLRenderer.SPEED1;
 		}
 		setSpeedIcon();
 	}
 	
+	//set the speed icon based on our current speed
 	private void setSpeedIcon(){
 		Button speed = (Button) findViewById(R.id.currentOption);
-		if (openGLRenderer.SPEED  == openGLRenderer.SPEED2)
+		if (openGLRenderer.speed  == openGLRenderer.SPEED2)
 			speed.setBackgroundResource(R.drawable.speed2);
-		else if (openGLRenderer.SPEED  == openGLRenderer.SPEED3)
+		else if (openGLRenderer.speed  == openGLRenderer.SPEED3)
 			speed.setBackgroundResource(R.drawable.speed3);
-		else if (openGLRenderer.SPEED  == openGLRenderer.SPEED4)
+		else if (openGLRenderer.speed  == openGLRenderer.SPEED4)
 			speed.setBackgroundResource(R.drawable.speed4);
 		else
 			speed.setBackgroundResource(R.drawable.speed1);
