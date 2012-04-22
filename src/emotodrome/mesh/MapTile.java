@@ -4,51 +4,19 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class MapTile extends Plane {
 
-	private float westLat;
-	private float eastLat;
-	private float southLon;
-	private float northLon;
+	private float westLon;
+	private float eastLon;
+	private float southLat;
+	private float northLat;
 	private Group ice;
 	
 	public MapTile(float width, float height){
 		super(width, height);
-		this.setWestLat(0);
-		this.setEastLat(0);
-		this.setSouthLon(0);
-		this.setNorthLon(0);
+		this.setWestLon(0);
+		this.setEastLon(0);
+		this.setSouthLat(0);
+		this.setNorthLat(0);
 		ice = new Group();
-	}
-
-	public float getWestLat() {
-		return westLat;
-	}
-
-	public void setWestLat(float westLat) {
-		this.westLat = westLat;
-	}
-
-	public float getEastLat() {
-		return eastLat;
-	}
-
-	public void setEastLat(float eastLat) {
-		this.eastLat = eastLat;
-	}
-
-	public float getSouthLon() {
-		return southLon;
-	}
-
-	public void setSouthLon(float southLon) {
-		this.southLon = southLon;
-	}
-
-	public float getNorthLon() {
-		return northLon;
-	}
-
-	public void setNorthLon(float northLon) {
-		this.northLon = northLon;
 	}
 	
 	public void addIce(Mesh m){
@@ -66,5 +34,37 @@ public class MapTile extends Plane {
 	public void draw(GL10 gl){
 		super.draw(gl);
 		ice.draw(gl);
+	}
+
+	public float getWestLon() {
+		return westLon;
+	}
+
+	public void setWestLon(float westLon) {
+		this.westLon = westLon + 180;
+	}
+
+	public float getEastLon() {
+		return eastLon;
+	}
+
+	public void setEastLon(float eastLon) {
+		this.eastLon = eastLon + 180;
+	}
+
+	public float getSouthLat() {
+		return southLat;
+	}
+
+	public void setSouthLat(float southLat) {
+		this.southLat = southLat;
+	}
+
+	public float getNorthLat() {
+		return northLat;
+	}
+
+	public void setNorthLat(float northLat) {
+		this.northLat = northLat;
 	}
 }

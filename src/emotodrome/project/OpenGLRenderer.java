@@ -642,12 +642,12 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		for (int i = 0; i < NUMMAPIMAGES; i++){
 			double topBound = backend.top - lonSize * (i/MAPCOLUMNS);
 			MapTile m = (MapTile) mapgroup.get(i);
-			m.setWestLat((float) leftBound);
+			m.setWestLon((float) leftBound);
 			double potentialRightBound = leftBound + latSize;
 			double rightBound = (leftBound + latSize) > 180 ? (-360 + potentialRightBound) : potentialRightBound;
-			m.setEastLat((float) rightBound);
-			m.setNorthLon((float) topBound);
-			m.setSouthLon((float) (topBound - lonSize));
+			m.setEastLon((float) rightBound);
+			m.setNorthLat((float) topBound);
+			m.setSouthLat((float) (topBound - lonSize));
 			leftBound = i%3 < 2 ? rightBound : backend.left;
 		}
 	}
@@ -718,18 +718,19 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		public void run() {
 			for (int i = 0; i < NUMMAPIMAGES; i++){
 				MapTile m = (MapTile) mapgroup.get(i);
-				float east = m.getEastLat();
-				float west = m.getWestLat();
-				float north = m.getNorthLon();
-				float south = m.getSouthLon();
+				float east = m.getEastLon();
+				float west = m.getWestLon();
+				float north = 43.1f;
+				float south = 42.9f;
 				for (Vec3 pos : iceData.keySet()){
-					if (pos.x < east && pos.x > west && pos.z < north && pos.z > south){
+					if (pos.x <= east && pos.x > west && pos.z <= north && pos.z > south){
 						float iceValue = iceData.get(pos);
 						CircleWave c = new CircleWave((int) Math.ceil(iceValue/10), .01f, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
 						c.x = m.x;
 						c.z = m.z;
 						c.y = 1;
 						m.addIce(c);
+						System.out.println("FOUND ICE");
 					}
 				}
 			}
