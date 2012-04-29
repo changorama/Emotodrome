@@ -27,13 +27,22 @@ public class MapTile extends Plane {
 		ice.remove(m);
 	}
 	
+	public Group getIce(){
+		return ice;
+	}
+	
 	public void clearIce(Mesh m){
 		ice.clear();
 	}
 	
 	public void draw(GL10 gl){
+		gl.glPushMatrix();
 		super.draw(gl);
+		gl.glPopMatrix();
+		
+		gl.glPushMatrix();
 		ice.draw(gl);
+		gl.glPopMatrix();
 	}
 
 	public float getWestLon() {

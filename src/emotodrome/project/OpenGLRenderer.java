@@ -46,6 +46,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	private Group closestIce;				//holds locator lines
 	private Group sky;  					//holds meshes used to draw sky
 	private Mesh userAvatar;
+	private Mesh originMarker;
 	private final double SENSITIVITY = 0.5; // Sensitivity of motion controls.
 	public final float SPEED1 = .05f;  		//movement speed options
 	public final float SPEED2 = .1f;
@@ -201,6 +202,8 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		}
 		updateLatLonBounds();
 		
+		
+		
 		mapMoveForward = -MAPHEIGHT/2;
 		mapMoveBackward = MAPHEIGHT/2;
 		mapMoveRight = MAPWIDTH/2;
@@ -224,6 +227,11 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		userAvatar.x = camera.getEyeX();
 		userAvatar.y = camera.getEyeY();
 		userAvatar.z = camera.getEyeZ();
+		
+		originMarker = new Cube(.2f, .2f, .2f);
+		originMarker.x = 0;
+		originMarker.y = .1f;
+		originMarker.z = 0;
 		
 		new Thread(new IceThread()).start();
 		locateThread = new Thread(new FindClosest());
@@ -434,6 +442,10 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		
 		gl.glPushMatrix();
 		closestIce.draw(gl);
+		gl.glPopMatrix();
+		
+		gl.glPushMatrix();
+		originMarker.draw(gl);
 		gl.glPopMatrix();
 
 		//gl.glDisable(GL10.GL_TEXTURE_2D);
@@ -768,22 +780,38 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			Vec3 closest = null;
 			while (true){
 				Vec3 userLocation = camera.getEye();
-				for (int lat = -85; lat < 85; lat++){
-					for (int lon = 0; lon < 360; lon++){
-						Vec3 pos = new Vec3(lat, 0, lon);
-						if ((dist = pos.distance(userLocation)) < mindist && iceData.get(pos) != null){
+				for (int i = 0; i < mapgroup.size(); i++){
+					MapTile m = (MapTile) mapgroup.get(i);
+					Group ice = m.getIce();
+					System.out.println("ice size: " + ice.size());
+					for (int j = 0; j < ice.size(); i++){
+						Vec3 pos = ice.get(j).getPosition();
+						if ((dist = pos.distance(userLocation)) < mindist){
 							mindist = dist;
 							closest = pos;
+							System.out.println("ice at: " + pos);
 							if (closestIce.size() > 0)
 								closestIce.remove(0);
 							closestIce.add(new LocatorLine(userLocation, closest));
 						}
+						System.out.println("dist is " + dist);
 					}
 				}
+//				for (int lat = -85; lat < 85; lat++){
+//					for (int lon = 0; lon < 360; lon++){
+//						Vec3 pos = new Vec3(lat, 0, lon);
+//						if ((dist = pos.distance(userLocation)) < mindist && iceData.get(pos) != null){
+//							mindist = dist;
+//							closest = pos;
+//							if (closestIce.size() > 0)
+//								closestIce.remove(0);
+//							closestIce.add(new LocatorLine(userLocation, closest));
+//						}
+//					}
+//				}
 			}
-			
-		}
 		
+		}
 	}
 	
 }

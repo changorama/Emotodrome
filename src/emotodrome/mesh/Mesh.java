@@ -263,4 +263,8 @@ public class Mesh implements Cloneable{
 		this.y = p.y;
 		this.z = p.z;
 	}
+	
+	public Vec3 getPosition(){
+		return new Vec3(x, y, z);
+	}
 }

@@ -90,7 +90,7 @@ public class Backend{
 		server = new Server(getAndroidID(), locationManager.getLongitude(),
 				locationManager.getLatitude(), zoom);
 		File iceData = activity.getFileStreamPath(ICE_DATA_FILE);
-		if (!iceData.exists()){
+//		if (!iceData.exists()){
 			server.sendToServer("d,0,0,0\n");
 			try {
 				if (server.receiveIceDataFile(activity.openFileOutput(ICE_DATA_FILE, 0)) < 0){
@@ -99,7 +99,7 @@ public class Backend{
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-		}
+//		}
 	}
 	
 	public HashMap<Vec3, Float> processIceData(){
@@ -115,9 +115,9 @@ public class Backend{
 				int lon = Integer.valueOf(values[1]);
 				float icePercentage = Float.valueOf(values[2]);
 				if (icePercentage > 0){
-					icePercents.put(new Vec3(lat, 0, lon), icePercentage);
+					icePercents.put(new Vec3(lon, 0, lat), icePercentage);
 				}
-				System.out.println(lat + ", " + lon + " processed");
+				System.out.println(lon + ", " + lat + " processed");
 			}
 			return icePercents;
 		} catch (FileNotFoundException e) {
