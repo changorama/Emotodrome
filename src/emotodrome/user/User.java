@@ -12,6 +12,8 @@ public class User {
 
 	private Vec3 userVector;
 	private Mesh userAvatar;
+	private float lat;
+	private float lon;
 	
 	public User(Vec3 userVector){
 		this.userVector = userVector;
@@ -36,5 +38,21 @@ public class User {
 	
 	public void draw(GL10 gl){
 		userAvatar.draw(gl);
+	}
+
+	public float getLat() {
+		return lat;
+	}
+
+	public void setLat(float lat) {
+		this.lat = lat;
+	}
+
+	public float getLon() {
+		return lon;
+	}
+
+	public void setLon(float lon) {
+		this.lon = lon;
 	}
 }

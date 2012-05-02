@@ -732,8 +732,10 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 				MapTile m = (MapTile) mapgroup.get(i);
 				float east = m.getEastLon();
 				float west = m.getWestLon();
+				//CHANGE TO m.getNorthLat()/m.getSouthLat FOR REAL STUFF
 				float north = 43.1f;
 				float south = 42.9f;
+				
 				for (Vec3 pos : iceData.keySet()){
 					if (pos.x <= east && pos.x > west && pos.z <= north && pos.z > south){
 						float iceValue = iceData.get(pos);

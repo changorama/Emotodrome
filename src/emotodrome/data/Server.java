@@ -210,31 +210,8 @@ public class Server {
 	}
 	
 	public void listenToServer(HashMap<Integer, User> users){
-//		ByteBuffer target = ByteBuffer.allocate(2 * 1000);
-//		CharBuffer cbuff = target.asCharBuffer();
 		while (connected){
 			String line = "";
-//			try{
-//				if (out_socket.isConnected()){
-//					String line = "";
-//					char c = ' ';
-//					while (c != '\n'){
-//						try{
-//							if (out_socket.read(target) == 0){
-//								continue;
-//							}
-//							c = cbuff.get(); //throws BufferUnderflowException if only 1 byte to read in buffer
-//							System.out.println("char received: " + c);
-//							line += c;
-//						} catch (BufferUnderflowException e) {
-//				            // If we arrive here, it means we reached the end of
-//				            // the buffer and didn't find 2 bytes, so back up
-//				            continue;
-//				         }
-//					}
-//					target.clear();
-//					target.rewind();
-//					cbuff.rewind();
 			try {
 				if (in != null){
 					line = in.readLine();
@@ -255,6 +232,16 @@ public class Server {
 						else{
 							User newUser = new User(userVector);
 							users.put(key, newUser);
+						}
+					}
+					else if (request.equals("LALO")){
+						int key = Integer.valueOf(values[1]);
+						float lat = Float.valueOf(values[2]);
+						float lon = Float.valueOf(values[3]);
+						if (users.containsKey(key)){
+							User u = users.get(key);
+							u.setLat(lat);
+							u.setLon(lon);
 						}
 					}
 					else if (request.equals("ADDICE")){

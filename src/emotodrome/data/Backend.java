@@ -372,6 +372,11 @@ public class Backend{
 		System.out.println("sent " + v.x + "," + v.y + "," + v.z);
 	}
 	
+	public void sendUserLatLon(double latitude, double longitude){
+		server.sendToServer("l," + latitude + "," + longitude + ",0\n");
+		System.out.println("sent lat,lon: " + latitude + "," + longitude);
+	}
+	
 	public void listenUserUpdates(HashMap<Integer, User> users){
 		serverListener = new Thread(server.new ServerListener(users));
 		serverListener.start();
