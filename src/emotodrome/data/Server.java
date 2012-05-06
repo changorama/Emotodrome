@@ -7,22 +7,15 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.UnknownHostException;
-import java.nio.BufferUnderflowException;
-import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.PriorityQueue;
-
 import javax.net.SocketFactory;
 
 import org.apache.http.HttpResponse;
@@ -30,12 +23,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import emotodrome.mesh.Cube;
-import emotodrome.mesh.Group;
 import emotodrome.mesh.Vec3;
 import emotodrome.user.User;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 //TODO server sends id at start, server sends id request upon opening an output socket with client, client sends id to server

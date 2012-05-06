@@ -326,8 +326,8 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		} else {
 			gl.glDisable(GL10.GL_LIGHTING);
 		}
-		
-		camera.moveCamera(speed, ((MapTile)mapgroup.get(CENTERINDEX)).getRatio());													//move camera
+		Vec3 currentRatio = ((MapTile)mapgroup.get(CENTERINDEX)).getRatio();
+		camera.moveCamera(speed, currentRatio);													//move camera
 		if (camera.getMoveForward() == true){
 			backend.updateUserLocation(camera.getLatLon());							//if we have moved, update the server
 		}
@@ -404,10 +404,10 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 				avatar.rx = 90;
 				avatar.loadGLTexture(gl, context, R.drawable.avatar);
 			}
-			Vec3 userVector = user.getUserVector();
-			avatar.x = userVector.x;
-			avatar.y = userVector.y;
-			avatar.z = userVector.z;
+			Vec3 userVector = user.getMoveAmount(currentRatio);
+			avatar.x += userVector.x;
+			avatar.y += userVector.y;
+			avatar.z += userVector.z;
 			user.draw(gl);
 		}
 		gl.glPopMatrix();

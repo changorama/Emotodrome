@@ -11,12 +11,14 @@ import emotodrome.mesh.Vec3;
 public class User {
 
 	private Vec3 userVector;
+	private Vec3 previousUserVector;
 	private Mesh userAvatar;
 	private float lat;
 	private float lon;
 	
 	public User(Vec3 userVector){
 		this.userVector = userVector;
+		this.previousUserVector = userVector;
 	}
 	
 	public Mesh setUserAvatar(Mesh userAvatar){
@@ -29,6 +31,7 @@ public class User {
 	}
 	
 	public void setUserVector(Vec3 userVector){
+		previousUserVector = this.userVector;
 		this.userVector = userVector;
 	}
 	
@@ -54,5 +57,10 @@ public class User {
 
 	public void setLon(float lon) {
 		this.lon = lon;
+	}
+
+	public Vec3 getMoveAmount(Vec3 ratio) {
+		
+		return new Vec3((userVector.x - previousUserVector.x)/ratio.x, (userVector.y - previousUserVector.y)/ratio.y, (userVector.z - previousUserVector.z)/ratio.z);
 	}
 }
