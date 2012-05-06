@@ -10,6 +10,7 @@ public class Camera {
 	private Vec3 eye;				//position vector of camera
 	private Vec3 persp;				//perspective vector of camera
 	private Vec3 up;				//up vector of camera
+	private Vec3 latLon;
 	private boolean move;			//are we moving
 	private float skyHeight = 101f;	//max height we can fly to
 	private String rotatorP = "";	//up and down turning
@@ -19,22 +20,25 @@ public class Camera {
 		eye = new Vec3(0, 0, 1);
 		persp = new Vec3(0, 0, -1);
 		up = new Vec3(0, 1, 0);
+		latLon = new Vec3(0, 0, 0);
 	}
 	
-	public Camera(Vec3 eye){
+	public Camera(Vec3 eye, Vec3 latLon){
 		this.eye = eye;
 		persp = new Vec3(0, 0, eye.z - 2);
 		up = new Vec3(0, 1, 0);
+		this.latLon = latLon;
 	}
 	
-	public Camera(Vec3 eye, Vec3 persp, Vec3 up){
+	public Camera(Vec3 eye, Vec3 persp, Vec3 up, Vec3 latLon){
 		this.eye = eye;
 		this.persp = persp;
 		this.up = up;
+		this.latLon = latLon;
 	}
 	
 	//handles camera movement
-	public void moveCamera(float speed)
+	public void moveCamera(float speed, Vec3 ratio)
 	{
 		double pitch = 0, roll = 0;
 		if(rotatorP.equals("") || rotatorR.equals(""))
@@ -78,7 +82,7 @@ public class Camera {
 		
 		if(move)
 		{
-			moveForward(speed);
+			moveForward(speed, ratio);
 		}
 		
 		if(eye.y < 0)
@@ -96,7 +100,7 @@ public class Camera {
 	}
 	
 	//move the camera forward one unit
-	private void moveForward(float speed)
+	private void moveForward(float speed, Vec3 ratio)
 	{
 		double scale = Math.sqrt(Math.pow(eye.x - persp.x, 2) + 
 				Math.pow(eye.y - persp.y, 2) + 
@@ -104,6 +108,10 @@ public class Camera {
 		double movex = ((persp.x - eye.x) / scale) * speed;
 		double movey = ((persp.y - eye.y) / scale) * speed;
 		double movez = ((persp.z - eye.z) / scale) * speed;
+		
+		latLon.x += movex * ratio.x;
+		latLon.y += movey * ratio.y;
+		latLon.z += movez * ratio.z;
 		
 		eye.x += movex;
 		persp.x += movex;
@@ -188,6 +196,9 @@ public class Camera {
 	}
 	public Vec3 getUp(){
 		return up;
+	}
+	public Vec3 getLatLon(){
+		return latLon;
 	}
 	public float getEyeX(){
 		return eye.x;

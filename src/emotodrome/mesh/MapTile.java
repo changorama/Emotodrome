@@ -8,10 +8,18 @@ public class MapTile extends Plane {
 	private float eastLon;
 	private float southLat;
 	private float northLat;
+	private float width;
+	private float height;
+	private Vec3 center;
+	private Vec3 glToDegreeRatio;
 	private Group ice;
 	
 	public MapTile(float width, float height){
 		super(width, height);
+		this.width = width;
+		this.height = height;
+		center = new Vec3();
+		glToDegreeRatio = new Vec3(1, 1, 1);
 		this.setWestLon(0);
 		this.setEastLon(0);
 		this.setSouthLat(0);
@@ -51,6 +59,8 @@ public class MapTile extends Plane {
 
 	public void setWestLon(float westLon) {
 		this.westLon = westLon + 180;
+		center.x = (this.westLon + this.eastLon)/2;
+		glToDegreeRatio.x = Math.abs(this.westLon - this.eastLon)/width;
 	}
 
 	public float getEastLon() {
@@ -59,6 +69,8 @@ public class MapTile extends Plane {
 
 	public void setEastLon(float eastLon) {
 		this.eastLon = eastLon + 180;
+		center.x = (this.eastLon + this.westLon)/2;
+		glToDegreeRatio.x = Math.abs(this.westLon - this.eastLon)/width;
 	}
 
 	public float getSouthLat() {
@@ -67,6 +79,8 @@ public class MapTile extends Plane {
 
 	public void setSouthLat(float southLat) {
 		this.southLat = southLat;
+		center.z = (this.southLat + this.northLat)/2;
+		glToDegreeRatio.z = Math.abs(this.southLat - this.northLat)/height;
 	}
 
 	public float getNorthLat() {
@@ -75,5 +89,16 @@ public class MapTile extends Plane {
 
 	public void setNorthLat(float northLat) {
 		this.northLat = northLat;
+		center.z = (this.southLat + this.northLat)/2;
+		glToDegreeRatio.z = Math.abs(this.southLat - this.northLat)/height;
+	}
+
+	public Vec3 getCenter() {
+		return center;
+	}
+	
+	public Vec3 getRatio(){
+		return glToDegreeRatio;
+		
 	}
 }

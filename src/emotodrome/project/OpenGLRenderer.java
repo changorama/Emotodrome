@@ -59,6 +59,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	private final float MAPHEIGHT = 200;	//length of a map tile
 	private final int MAPROWS = 3;			//number of map tiles lined up parallel to the x axis
 	private final int MAPCOLUMNS = 3;		//number of map tiles lined up parallel to z axis
+	private final int CENTERINDEX = 4;
 	
 	/*if users x location is greater than mapMoveForward, the map tiles will all shift forward one tile, 
 	 * similarly for the rest of these mapMove variables
@@ -222,7 +223,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		closestIce = new Group();
 		backend.listenUserUpdates(users);		//begin listening for location updates from other users
 
-		camera = new Camera(new Vec3(0f, 0f, 0f));
+		camera = new Camera(new Vec3(0f, 0f, 0f), ((MapTile) mapgroup.get(CENTERINDEX)).getCenter());
 		userAvatar = new Cube(1f, 1f, 1f);
 		userAvatar.x = camera.getEyeX();
 		userAvatar.y = camera.getEyeY();
@@ -326,9 +327,9 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			gl.glDisable(GL10.GL_LIGHTING);
 		}
 		
-		camera.moveCamera(speed);													//move camera
+		camera.moveCamera(speed, ((MapTile)mapgroup.get(CENTERINDEX)).getRatio());													//move camera
 		if (camera.getMoveForward() == true){
-			backend.updateUserLocation(camera.getEye());							//if we have moved, update the server
+			backend.updateUserLocation(camera.getLatLon());							//if we have moved, update the server
 		}
 		GLU.gluLookAt(gl, camera.getEyeX(), camera.getEyeY(), camera.getEyeZ(), 	//defines where the camera is looking
 				camera.getPerspX(), camera.getPerspY(), camera.getPerspZ(),
