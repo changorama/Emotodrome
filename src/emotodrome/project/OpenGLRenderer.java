@@ -393,14 +393,6 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			updateTexture = false;
 		}
 		
-		userAvatar.x = camera.getEyeX();
-		userAvatar.y = camera.getEyeY();
-		userAvatar.z = camera.getEyeZ() + 1;
-		
-		//gl.glPushMatrix();
-		//userAvatar.draw(gl);
-		//gl.glPopMatrix();
-		
 		//draw other users avatars
 		Collection<User> collection = users.values();
 		for (User user:collection){
@@ -410,21 +402,10 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 				avatar.rx = 90;
 				avatar.loadGLTexture(gl, context, R.drawable.avatar);
 			}
-//			Vec3 userVector = user.getUserVector();
-//			avatar.x = userVector.x;
-//			avatar.y = userVector.y;
-//			avatar.z = userVector.z;
 			gl.glPushMatrix();
 			user.draw(gl);
 			gl.glPopMatrix();
 		}
-
-//		for (int i = (int) (camera.getEyeX()); i < camera.getEyeX() + 20; i++){
-//			for (int j = (int) camera.getEyeZ(); j < camera.getEyeZ() + 20; j++){
-//				if (i > 0 && j > 0 && i < 170 && j < 360 && ice[i][j] != null)
-//					ice[i][j].draw(gl);
-//			}
-//		}
 		
 		//pyrite.draw(gl);
 //		gl.glDisable(GL10.GL_TEXTURE_2D);
@@ -755,13 +736,14 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 					}
 				}
 				for (User u : users.values()){
-					int id = u.getId();
 					Vec3 latLon = u.getLatLon();
 					System.out.println("USER LOC :" + latLon);
 					if (latLon.x <= east && latLon.x > west && latLon.z <= north && latLon.z > south){
 						Mesh marker = u.getUserPlacemarker();
-						marker.x = m.x;
-						marker.z = m.z;
+						Mesh avatar = u.setUserAvatar(new Plane(1, 1));
+						marker.x = avatar.x = m.x;
+						marker.y = avatar.y = 0f;
+						marker.z = avatar.z = m.z;
 						m.addMarker(marker);
 					}
 				}	
@@ -787,9 +769,10 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 					if (latLon.x <= east && latLon.x > west && latLon.z <= north && latLon.z > south){
 						System.out.println("user placed at" + m.x + "," + m.z);
 						Mesh marker = u.getUserPlacemarker();
-						marker.x = m.x;
-						marker.y = 0f;
-						marker.z = m.z;
+						Mesh avatar = u.setUserAvatar(new Plane(1, 1));
+						marker.x = avatar.x = m.x;
+						marker.y = avatar.y = 0f;
+						marker.z = avatar.z = m.z;
 						m.addMarker(marker);
 					}
 				}
