@@ -114,6 +114,8 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	
 	private Thread locateThread;
 	
+	public static boolean newUsers = false;
+	
 	/**
 	 * constructor initializes the view we will render in, sets up sensors we will use, initializes our light/fog buffers, and initializes 
 	 * all objects that will be drawn initially
@@ -197,8 +199,8 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			p.rz = -90;
 			p.rx = -90;
 			p.y = -1;
-			p.z = (float) (-MAPHEIGHT + MAPHEIGHT * (i/MAPROWS) + backend.longitude);
-			p.x = (float) (-MAPWIDTH + MAPWIDTH * (i%MAPCOLUMNS) + backend.latitude);
+			p.z = (float) (-MAPHEIGHT + MAPHEIGHT * (i/MAPROWS));
+			p.x = (float) (-MAPWIDTH + MAPWIDTH * (i%MAPCOLUMNS));
 			mapgroup.add(i, p);
 		}
 		updateLatLonBounds();
@@ -329,8 +331,13 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		Vec3 currentRatio = ((MapTile)mapgroup.get(CENTERINDEX)).getRatio();
 		camera.moveCamera(speed, currentRatio);													//move camera
 		if (camera.getMoveForward() == true){
-			backend.updateUserLocation(camera.getLatLon());							//if we have moved, update the server
+			backend.updateUserLocation(camera.getMoveAmount());							//if we have moved, update the server
 		}
+		
+		if (newUsers){
+			new Thread(new UserThread()).start();
+		}
+		
 		GLU.gluLookAt(gl, camera.getEyeX(), camera.getEyeY(), camera.getEyeZ(), 	//defines where the camera is looking
 				camera.getPerspX(), camera.getPerspY(), camera.getPerspZ(),
 				camera.getUpX(), camera.getUpY(), camera.getUpZ());
@@ -396,7 +403,6 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		
 		//draw other users avatars
 		Collection<User> collection = users.values();
-		gl.glPushMatrix();
 		for (User user:collection){
 			Mesh avatar = user.getUserAvatar();
 			if (avatar == null){
@@ -404,13 +410,14 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 				avatar.rx = 90;
 				avatar.loadGLTexture(gl, context, R.drawable.avatar);
 			}
-			Vec3 userVector = user.getMoveAmount(currentRatio);
-			avatar.x += userVector.x;
-			avatar.y += userVector.y;
-			avatar.z += userVector.z;
+//			Vec3 userVector = user.getUserVector();
+//			avatar.x = userVector.x;
+//			avatar.y = userVector.y;
+//			avatar.z = userVector.z;
+			gl.glPushMatrix();
 			user.draw(gl);
+			gl.glPopMatrix();
 		}
-		gl.glPopMatrix();
 
 //		for (int i = (int) (camera.getEyeX()); i < camera.getEyeX() + 20; i++){
 //			for (int j = (int) camera.getEyeZ(); j < camera.getEyeZ() + 20; j++){
@@ -443,10 +450,6 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		
 		gl.glPushMatrix();
 		closestIce.draw(gl);
-		gl.glPopMatrix();
-		
-		gl.glPushMatrix();
-		originMarker.draw(gl);
 		gl.glPopMatrix();
 
 		//gl.glDisable(GL10.GL_TEXTURE_2D);
@@ -726,7 +729,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	
 	//handles determining where we should be drawing ice and what it should look like
 	private class IceThread implements Runnable{
-
+		
 		@Override
 		public void run() {
 			for (int i = 0; i < NUMMAPIMAGES; i++){
@@ -734,9 +737,12 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 				float east = m.getEastLon();
 				float west = m.getWestLon();
 				//CHANGE TO m.getNorthLat()/m.getSouthLat FOR REAL STUFF
-				float north = 43.1f;
-				float south = 42.9f;
+//				float north = 43.1f;
+//				float south = 42.9f;
+				float north = m.getNorthLat();
+				float south = m.getSouthLat();
 				
+				//still need to make it so same ice not added multiple times
 				for (Vec3 pos : iceData.keySet()){
 					if (pos.x <= east && pos.x > west && pos.z <= north && pos.z > south){
 						float iceValue = iceData.get(pos);
@@ -748,29 +754,49 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 						System.out.println("FOUND ICE");
 					}
 				}
+				for (User u : users.values()){
+					int id = u.getId();
+					Vec3 latLon = u.getLatLon();
+					System.out.println("USER LOC :" + latLon);
+					if (latLon.x <= east && latLon.x > west && latLon.z <= north && latLon.z > south){
+						Mesh marker = u.getUserPlacemarker();
+						marker.x = m.x;
+						marker.z = m.z;
+						m.addMarker(marker);
+					}
+				}	
 			}
-//			while (true){
-//				Vec3 userLocation = camera.getEye();
-//				for (int lat = -10; lat < 10; lat++){
-//					for (int lon = 0; lon < 20; lon++){
-//						Vec3 pos = new Vec3(Math.round(userLocation.x) + lat, 0, Math.round(userLocation.z) + lon);
-//						Float iceValue = iceData.get(pos);
-////						System.out.println(pos.x + "," + pos.z + "," + "ice: " + iceValue);
-//						if (iceValue != null && !currentIce[lat + 90][lon]){
-//							CircleWave c = new CircleWave((int) Math.ceil(iceValue/10), .01f, 1, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
-//							c.x = pos.x;
-//							c.z = pos.z;
-//							c.y = 1;
-//							ice.add(c);
-//							currentIce[lat + 90][lon] = true;
-//						}
-//					}
-//				}
-//				
-//			}
-			
 		}
 		
+	}
+	private class UserThread implements Runnable{
+		
+		@Override
+		public void run() {
+			for (int i = 0; i < NUMMAPIMAGES; i++){
+				MapTile m = (MapTile) mapgroup.get(i);
+				float east = m.getEastLon();
+				float west = m.getWestLon();
+				float north = m.getNorthLat();
+				float south = m.getSouthLat();
+				System.out.println("east " + east + ",west " + west + ",north " + north + ",south " + south);
+				for (User u : users.values()){
+					int id = u.getId();
+					Vec3 latLon = u.getLatLon();
+					System.out.println("USER LOC :" + latLon);
+					if (latLon.x <= east && latLon.x > west && latLon.z <= north && latLon.z > south){
+						System.out.println("user placed at" + m.x + "," + m.z);
+						Mesh marker = u.getUserPlacemarker();
+						marker.x = m.x;
+						marker.y = 0f;
+						marker.z = m.z;
+						m.addMarker(marker);
+					}
+				}
+				
+			}
+			newUsers = false;
+		}
 	}
 	
 	//thread to find the closest ice point

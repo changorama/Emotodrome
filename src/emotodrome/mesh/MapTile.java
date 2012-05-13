@@ -13,6 +13,8 @@ public class MapTile extends Plane {
 	private Vec3 center;
 	private Vec3 glToDegreeRatio;
 	private Group ice;
+	private Group users;
+	private boolean[] visible_users;
 	
 	public MapTile(float width, float height){
 		super(width, height);
@@ -24,7 +26,9 @@ public class MapTile extends Plane {
 		this.setEastLon(0);
 		this.setSouthLat(0);
 		this.setNorthLat(0);
+		visible_users = new boolean[1000];
 		ice = new Group();
+		users = new Group();
 	}
 	
 	public void addIce(Mesh m){
@@ -35,12 +39,21 @@ public class MapTile extends Plane {
 		ice.remove(m);
 	}
 	
+	public void addMarker(Mesh m){
+		users.add(m);
+	}
+	
+	public void removeMarker(Mesh m){
+		users.remove(m);
+	}
+	
 	public Group getIce(){
 		return ice;
 	}
 	
 	public void clearIce(Mesh m){
 		ice.clear();
+		users.clear();
 	}
 	
 	public void draw(GL10 gl){
@@ -50,6 +63,10 @@ public class MapTile extends Plane {
 		
 		gl.glPushMatrix();
 		ice.draw(gl);
+		gl.glPopMatrix();
+		
+		gl.glPushMatrix();
+		users.draw(gl);
 		gl.glPopMatrix();
 	}
 
@@ -101,4 +118,5 @@ public class MapTile extends Plane {
 		return glToDegreeRatio;
 		
 	}
+	
 }

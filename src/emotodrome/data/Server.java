@@ -24,6 +24,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import emotodrome.mesh.Vec3;
+import emotodrome.project.OpenGLRenderer;
 import emotodrome.user.User;
 
 import android.util.Log;
@@ -140,6 +141,7 @@ public class Server {
 				if (in != null){
 					line = in.readLine();
 					System.out.println("RECEIVED " + line);
+//					if (line == null){
 					if (line.startsWith("85,360")){
 						out.print(line);
 						out.close();
@@ -215,14 +217,15 @@ public class Server {
 						float x = Float.valueOf(values[2]);
 						float y = Float.valueOf(values[3]);
 						float z = Float.valueOf(values[4]);
-						Vec3 userVector = new Vec3(x,y,z);
+						Vec3 userMoveVector = new Vec3(x,y,z);
 						if (users.containsKey(key)){
-							users.get(key).setUserVector(userVector);
+							users.get(key).adjustUserVector(userMoveVector);
 						}
-						else{
-							User newUser = new User(userVector);
-							users.put(key, newUser);
-						}
+//						else{
+//							User newUser = new User(userVector, key);
+//							users.put(key, newUser);
+//							OpenGLRenderer.newUsers = true;
+//						}
 					}
 					else if (request.equals("LALO")){
 						int key = Integer.valueOf(values[1]);
@@ -230,9 +233,14 @@ public class Server {
 						float lon = Float.valueOf(values[3]);
 						if (users.containsKey(key)){
 							User u = users.get(key);
-							u.setLat(lat);
-							u.setLon(lon);
+							u.setLatLon(new Vec3(lon, 0, lat));
 						}
+						else{
+							User newUser = new User(new Vec3(lon, 0, lat), key);
+							users.put(key, newUser);
+							OpenGLRenderer.newUsers = true;
+						}
+						//should send a reply to tell new user our location as well
 					}
 					else if (request.equals("ADDICE")){
 						int lat = Integer.valueOf(values[1]);

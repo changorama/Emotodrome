@@ -109,7 +109,7 @@ public class Run extends Activity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		super.onStop();
+		super.onDestroy();
 	}
 
 	@Override

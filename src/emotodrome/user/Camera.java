@@ -11,6 +11,7 @@ public class Camera {
 	private Vec3 persp;				//perspective vector of camera
 	private Vec3 up;				//up vector of camera
 	private Vec3 latLon;
+	private Vec3 moveAmount;
 	private boolean move;			//are we moving
 	private float skyHeight = 101f;	//max height we can fly to
 	private String rotatorP = "";	//up and down turning
@@ -21,6 +22,7 @@ public class Camera {
 		persp = new Vec3(0, 0, -1);
 		up = new Vec3(0, 1, 0);
 		latLon = new Vec3(0, 0, 0);
+		moveAmount = new Vec3(0, 0, 0);
 	}
 	
 	public Camera(Vec3 eye, Vec3 latLon){
@@ -28,6 +30,7 @@ public class Camera {
 		persp = new Vec3(0, 0, eye.z - 2);
 		up = new Vec3(0, 1, 0);
 		this.latLon = latLon;
+		moveAmount = new Vec3(0, 0, 0);
 	}
 	
 	public Camera(Vec3 eye, Vec3 persp, Vec3 up, Vec3 latLon){
@@ -35,6 +38,7 @@ public class Camera {
 		this.persp = persp;
 		this.up = up;
 		this.latLon = latLon;
+		moveAmount = new Vec3(0, 0, 0);
 	}
 	
 	//handles camera movement
@@ -108,6 +112,10 @@ public class Camera {
 		double movex = ((persp.x - eye.x) / scale) * speed;
 		double movey = ((persp.y - eye.y) / scale) * speed;
 		double movez = ((persp.z - eye.z) / scale) * speed;
+		
+		moveAmount.x = (float) movex;
+		moveAmount.y = (float) movey;
+		moveAmount.z = (float) movez;
 		
 		latLon.x += movex * ratio.x;
 		latLon.y += movey * ratio.y;
@@ -197,9 +205,6 @@ public class Camera {
 	public Vec3 getUp(){
 		return up;
 	}
-	public Vec3 getLatLon(){
-		return latLon;
-	}
 	public float getEyeX(){
 		return eye.x;
 	}
@@ -226,5 +231,8 @@ public class Camera {
 	}
 	public float getUpZ(){
 		return up.z;
+	}
+	public Vec3 getMoveAmount() {
+		return moveAmount;
 	}
 }

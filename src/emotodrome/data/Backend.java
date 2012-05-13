@@ -99,6 +99,7 @@ public class Backend{
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
+		sendUserLatLon(latitude, longitude + 180);
 //		}
 	}
 	
