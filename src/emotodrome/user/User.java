@@ -18,6 +18,7 @@ public class User {
 	private Mesh userAvatar;
 	private Mesh userPlacemarker;
 	private Vec3 latLon;
+	private Vec3 moveLaterVector;
 	private int id;
 	
 	public User(Vec3 userVector, int id){
@@ -25,6 +26,7 @@ public class User {
 		this.previousUserVector = userVector;
 		this.latLon = new Vec3(userVector.x, 0, userVector.z);
 		this.id = id;
+		moveLaterVector = new Vec3(0, 0, 0);
 		setUserPlacemarker(new Cube(.5f, .5f, .5f));
 	}
 	
@@ -43,12 +45,22 @@ public class User {
 		userAvatar.setPosition(userVector);
 	}
 	
+	//TODO make so doesnt crash if move is received before frames start rendering (meaning userAvatar = null)
 	public void adjustUserVector(Vec3 moveVector){
 		userVector.setToAdd(moveVector);
-		userAvatar.x += moveVector.x;
-		userAvatar.y += moveVector.y;
-		userAvatar.z += moveVector.z;
-		System.out.println(userAvatar.x + "," + userAvatar.y + "," + userAvatar.z);
+		if (userAvatar != null){
+			if (moveLaterVector != null){
+				moveVector.setToAdd(moveLaterVector);
+				moveLaterVector = null;
+			}
+			userAvatar.x += moveVector.x;
+			userAvatar.y += moveVector.y;
+			userAvatar.z += moveVector.z;
+			System.out.println(userAvatar.x + "," + userAvatar.y + "," + userAvatar.z);
+		}
+		else {
+			moveLaterVector.setToAdd(moveVector);
+		}
 	}
 	
 	public Vec3 getUserVector(){

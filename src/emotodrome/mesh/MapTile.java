@@ -14,7 +14,6 @@ public class MapTile extends Plane {
 	private Vec3 glToDegreeRatio;
 	private Group ice;
 	private Group users;
-	private boolean[] visible_users;
 	
 	public MapTile(float width, float height){
 		super(width, height);
@@ -26,7 +25,6 @@ public class MapTile extends Plane {
 		this.setEastLon(0);
 		this.setSouthLat(0);
 		this.setNorthLat(0);
-		visible_users = new boolean[1000];
 		ice = new Group();
 		users = new Group();
 	}

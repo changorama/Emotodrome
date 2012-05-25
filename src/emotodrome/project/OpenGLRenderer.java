@@ -41,6 +41,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	private Backend backend;
 	
 	private HashMap<Integer, User> users;	//keys are user ids that map to a user currently connected to the server
+	private int num_users = 0;
 	private HashMap<Vec3, Float> iceData; 	//keys are a vector representing the lat/lon location of the ice and map to a float representing the amount of ice at this location
 	private Group ice;  					//holds the meshes that represent ice data
 	private Group closestIce;				//holds locator lines
@@ -407,8 +408,13 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			Mesh avatar = user.getUserAvatar();
 			if (avatar == null){
 				avatar = user.setUserAvatar(new Plane(1, 1));
-				avatar.rx = 90;
-				avatar.loadGLTexture(gl, context, R.drawable.avatar);
+				if (num_users % 3 == 0)
+					avatar.loadGLTexture(gl, context, R.drawable.chango_lg);
+				else if (num_users % 3 == 1)
+					avatar.loadGLTexture(gl, context, R.drawable.victoria_md);
+				else
+					avatar.loadGLTexture(gl, context, R.drawable.luke_md);
+				num_users++;
 			}
 //			Vec3 userVector = user.getUserVector();
 //			avatar.x = userVector.x;
