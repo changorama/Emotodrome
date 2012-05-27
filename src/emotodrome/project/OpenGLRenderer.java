@@ -117,6 +117,10 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	
 	public static boolean newUsers = false;
 	
+	private Mesh pyrite;
+	private Mesh circleWave;
+	private Mesh triangleOrigami;
+	
 	/**
 	 * constructor initializes the view we will render in, sets up sensors we will use, initializes our light/fog buffers, and initializes 
 	 * all objects that will be drawn initially
@@ -236,6 +240,13 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		originMarker.x = 0;
 		originMarker.y = .1f;
 		originMarker.z = 0;
+		
+		r = new Random();
+		pyrite = new Pyrite(.5f, .5f, .5f, r);
+		circleWave = new CircleWave(4, .01f, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
+		circleWave.x = -3;
+		circleWave.z = 2;
+		triangleOrigami = new TriangleOrigami(new Vec3(1, 0, 1), new Vec3(2, 1, 1), new Vec3(3, 0, .5f), r);
 		
 		new Thread(new IceThread()).start();
 		locateThread = new Thread(new FindClosest());
@@ -407,7 +418,9 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		for (User user:collection){
 			Mesh avatar = user.getUserAvatar();
 			if (avatar == null){
-				avatar = user.setUserAvatar(new Plane(1, 1));
+				Plane p = new Plane(1, 1);
+				p.rz = -90;
+				avatar = user.setUserAvatar(p);
 				if (num_users % 3 == 0)
 					avatar.loadGLTexture(gl, context, R.drawable.chango_lg);
 				else if (num_users % 3 == 1)
@@ -458,6 +471,17 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		closestIce.draw(gl);
 		gl.glPopMatrix();
 
+		gl.glPushMatrix();
+		pyrite.draw(gl);
+		gl.glPopMatrix();
+		
+		gl.glPushMatrix();
+		circleWave.draw(gl);
+		gl.glPopMatrix();
+		
+		gl.glPushMatrix();
+		triangleOrigami.draw(gl);
+		gl.glPopMatrix();
 		//gl.glDisable(GL10.GL_TEXTURE_2D);
 //		angle = (angle + 3.0f) % 360;
 //		for (int i = 0; i < NUMSHAPES; i++){

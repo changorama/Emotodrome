@@ -20,8 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="RunMap" android:label="@string/map_name">
-        </activity>
+        <activity android:name="LoadScreen"                 android:label="@string/app_name"     android:screenOrientation="landscape"></activity>
+        <activity android:name="RunMap" android:label="@string/map_name"></activity>
     </application>
     <uses-sdk android:minSdkVersion="7" />
     <uses-permission android:name="android.permission.INTERNET"/>
