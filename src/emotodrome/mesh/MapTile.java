@@ -49,7 +49,7 @@ public class MapTile extends Plane {
 		return ice;
 	}
 	
-	public void clearIce(Mesh m){
+	public void clearTile(Mesh m){
 		ice.clear();
 		users.clear();
 	}
