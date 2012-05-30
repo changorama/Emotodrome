@@ -833,6 +833,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			double mindist = 100000;
 			double dist;
 			Vec3 closest = null;
+			boolean ice_on_tile = false;
 			while (true){
 				Vec3 userLocation = camera.getEye();
 				for (int i = 0; i < mapgroup.size(); i++){
@@ -848,8 +849,42 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 							if (closestIce.size() > 0)
 								closestIce.remove(0);
 							closestIce.add(new LocatorLine(userLocation, closest));
+							ice_on_tile = true;
 						}
 						System.out.println("dist is " + dist);
+					}
+				}
+				if (!ice_on_tile){
+					MapTile m = (MapTile) mapgroup.get(4);
+					float center_x = (m.getEastLon() + m.getWestLon())/2;
+					float center_z = (m.getNorthLat() + m.getSouthLat())/2;
+					Vec3 center = new Vec3(center_x, 0, center_z);
+					for (Vec3 loc : iceData.keySet()){
+						if ((dist = loc.distance(center)) < mindist){
+							mindist = dist;
+							closest = loc;
+							System.out.println("ice at: " + loc);
+							if (closestIce.size() > 0)
+								closestIce.remove(0);
+							float xdist = Math.abs(loc.x - center.x);
+							float zdist = Math.abs(loc.z - center.z);
+							if (xdist > zdist){
+								if (loc.x > center.x){
+									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x, 0, userLocation.z + MAPHEIGHT)));
+								}
+								else{
+									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x, 0, userLocation.z - MAPHEIGHT)));
+								}
+							}
+							else{
+								if (loc.z > center.z){
+									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x + MAPWIDTH, 0, userLocation.z)));
+								}
+								else{
+									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x - MAPWIDTH, 0, userLocation.z)));
+								}
+							}
+						}
 					}
 				}
 //				for (int lat = -85; lat < 85; lat++){
