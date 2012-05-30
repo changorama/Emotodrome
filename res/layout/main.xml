@@ -48,4 +48,30 @@
     android:onClick="changeOption"
     android:text="LOCATE" />
 
+<Button
+    android:id="@+id/optionSub2"
+    android:visibility="gone"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_above="@+id/optionSub1"
+    android:layout_alignParentLeft="true"
+    android:background="@drawable/subtab"
+    android:onClick="volumeClicked"
+    android:text="VOLUME" />
+
+
+<SeekBar
+    android:id="@+id/volbar"
+    android:visibility="gone"
+    android:layout_above="@+id/volplusoption"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_centerHorizontal="true"
+    android:max="100"
+    android:minWidth="250px"
+    />
+
+
+
 </RelativeLayout>

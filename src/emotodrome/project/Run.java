@@ -19,6 +19,15 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.content.Context;
+
+
+
 /**
  * Title: Emotodrome
  * 
@@ -33,7 +42,7 @@ import android.widget.TextView;
  * {@linkhttp://iphonedevelopment.blogspot.com/}
  * {@linkhttp://blog.jayway.com/2010/02/15/opengl-es-tutorial-for-android-%E2%80%93-part-v/}
  * 
- * @author Seano Whitecloud, Justin Murray, Darren Cheng, and Luke Fowlie
+ * @author Seano Whitecloud, Justin Murray, Darren Cheng, Luke Fowlie, and Dohwee Kim
  * 
  * Class Description: Initializes android activity, sets renderer
  * 
@@ -49,16 +58,55 @@ public class Run extends Activity {
 	private int updatedCount;
 	private boolean optionsVisible = false;
 	
+	
+	//Variables for sound control
+	private boolean volcontrolVisible = false;
+	
+	//private SoundPool soundEffects;
+	SoundManager snd;
+	private Context pContext;            // local copy of app context 
+	public int bellSound , drumSound;	
+	public SeekBar seekvolbar;  // Volume control bar 
+	OnSeekBarChangeListener barChange; //Handler for seekbar
+	
+	// 
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
 		setContentView(R.layout.main);
+		
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		//String s = Server.getFileFromServer("README");
-		//backend = new Backend(this);
-		textView = (TextView)findViewById(R.id.text); 
-		textView.setText("***WELCOME*** (" + backend.getLatitude() + "," + backend.getLongitude() + ")");
+
+		// Sound files loading part
+		snd = new SoundManager(getApplicationContext());  //Create an instance of our sound manager 
+		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);  //Set volume rocker mode to media volume
+		bellSound = snd.load(R.raw.gong_burmese);
+		drumSound = snd.load(R.raw.bowla_emoto);
+		
+		// Seekbar listener, This will detect moving signal by seekbar 
+		barChange = new OnSeekBarChangeListener(){
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar){    }
+			
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {  }
+			
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+				switch (seekBar.getId()){
+				case R.id.volbar:
+					snd.setVolume((float)progress/100.0f);
+					break;
+				}
+			}
+			
+		};
+		seekvolbar = (SeekBar)findViewById(R.id.volbar);
+		seekvolbar.setOnSeekBarChangeListener(barChange);
+		
+		//soundEffects = new SoundPool(5, AudioManager.STREAM_MUSIC, 100);
+	
 		
 		GLSurfaceView glView = (GLSurfaceView) findViewById(R.id.surfaceview);
 		openGLRenderer = new OpenGLRenderer(this, glView, backend);
@@ -84,6 +132,7 @@ public class Run extends Activity {
 		//new BackendThreadSpawner().execute();
 		//new MapUpdater().execute();
 
+
 		//setContentView(openGLRenderer);
 		//glView.setRenderer(openGLRenderer);
 		
@@ -95,6 +144,7 @@ public class Run extends Activity {
 		super.onResume();
 		//openGLRenderer.onResume();
 	}
+	
 	
 	protected void onDestroy(){
 		try {
@@ -138,10 +188,14 @@ public class Run extends Activity {
 	
 	
 	public void toggleOptions(View view){
-		if (optionsVisible)
+		if (optionsVisible) {
 			findViewById(R.id.optionSub1).setVisibility(View.GONE);
-		else
+			findViewById(R.id.optionSub2).setVisibility(View.GONE);
+		}
+		else {
 			findViewById(R.id.optionSub1).setVisibility(View.VISIBLE);
+			findViewById(R.id.optionSub2).setVisibility(View.VISIBLE);
+		}
 		optionsVisible = !optionsVisible;
 	}
 	
@@ -181,6 +235,41 @@ public class Run extends Activity {
 		}
 	}
 	
+
+	
+	// The case Volume button has been clicked by user 
+	public void volumeClicked(View View){
+		//Testing playing Sound 
+		//playSound(soundSpeed , soundVolume);
+		snd.play(bellSound);
+		snd.play(drumSound);
+		
+		if (volcontrolVisible) {
+			findViewById(R.id.volbar).setVisibility(View.GONE);
+			//findViewById(R.id.optionSub1).setVisibility(View.GONE);
+			//findViewById(R.id.optionSub2).setVisibility(View.GONE);
+		}
+		else {
+			findViewById(R.id.volbar).setVisibility(View.VISIBLE);
+			//findViewById(R.id.optionSub1).setVisibility(View.VISIBLE);
+			//findViewById(R.id.optionSub2).setVisibility(View.VISIBLE);
+		}
+		volcontrolVisible = !volcontrolVisible;
+	}
+	
+	
+	
+	public void volplusclicked(View View){
+		
+	}
+	
+	public void volminusclicked(View View){
+		
+	}
+	public void playSound(float fSpeed, float fvolume){
+		//soundEffects.play(bellSound, fvolume, fvolume, 0, 1, fSpeed);
+		//soundEffects.play(drumSound, fvolume, fvolume, 0, 1, fSpeed);
+	}
 	//increase speed unless we are at max speed, in which case go back to first speed
 	private void changeSpeed(){
 		if (openGLRenderer.speed  == openGLRenderer.SPEED1)
@@ -213,6 +302,20 @@ public class Run extends Activity {
 			speed.setBackgroundResource(R.drawable.speed4);
 		else
 			speed.setBackgroundResource(R.drawable.speed1);
+	}
+	
+	protected class LoadBackendThread extends AsyncTask<Activity, Void, Void>{
+
+		@Override
+		protected Void doInBackground(Activity... activity) {
+			backend = new Backend(activity[0]);
+			return null;
+		}
+		
+		protected void onPostExecute(Void result){
+
+		}
+		
 	}
 	
 	/*

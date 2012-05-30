@@ -253,10 +253,6 @@ public class Server {
 						int lon = Integer.valueOf(values[2]);
 						remQueue.add(new Vec3(lat, 0, lon));
 					}
-					else if (request.equals("QUIT")){
-						int key = Integer.valueOf(values[1]);
-						users.remove(key);
-					}
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
