@@ -16,7 +16,10 @@ public class TriangleOrigami extends Mesh implements Gadget
 	private long lastTime;
 	private float newLength, oldLength;
 	private Random rand;
-	private int state = 0, lastEnd; /*
+	private int state = 0, lastEnd;
+	private final int MAX_TRIANGLES = 30;
+	private int num_triangles = 0;
+							/*
 							* State 0 means we haven't finished constructing the object yet.
 							* State 1 means we are cloning a triangle and choosing a fold vector and bone length.
 							* State 2 means we are folding the triangle.
@@ -44,12 +47,13 @@ public class TriangleOrigami extends Mesh implements Gadget
 	}
 	
 	private void update() {
-		while(true){
+		while(num_triangles < MAX_TRIANGLES){
 			switch(state)
 			{
 			case 0:
 				throw new IllegalStateException("TriangleOrigami object not properly initialized.");
 			case 1:
+				num_triangles++;
 				stack.push((PhysicsTriangle) stack.peek().clone());
 				Vec3 pin1 = new Vec3(), pin2 = new Vec3();
 				
