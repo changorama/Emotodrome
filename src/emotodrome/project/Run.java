@@ -18,15 +18,11 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
-
-
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.content.Context;
-
-
 
 /**
  * Title: Emotodrome
@@ -128,16 +124,12 @@ public class Run extends Activity {
 		shouldUpdateData = true;
 		spawnerToggle = true;
 		updatedCount = 0;
-		
 		//new BackendThreadSpawner().execute();
 		//new MapUpdater().execute();
-
-
 		//setContentView(openGLRenderer);
 		//glView.setRenderer(openGLRenderer);
 		
 	}
-
 
 	@Override
 	protected void onResume() {
@@ -302,20 +294,6 @@ public class Run extends Activity {
 			speed.setBackgroundResource(R.drawable.speed4);
 		else
 			speed.setBackgroundResource(R.drawable.speed1);
-	}
-	
-	protected class LoadBackendThread extends AsyncTask<Activity, Void, Void>{
-
-		@Override
-		protected Void doInBackground(Activity... activity) {
-			backend = new Backend(activity[0]);
-			return null;
-		}
-		
-		protected void onPostExecute(Void result){
-
-		}
-		
 	}
 	
 	/*
