@@ -242,7 +242,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		originMarker.z = 0;
 		
 		r = new Random();
-		pyrite = new Pyrite(.5f, .5f, .5f, r);
+		//pyrite = new Pyrite(.5f, .5f, .5f, r);
 		circleWave = new CircleWave(4, .01f, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
 		circleWave.x = -3;
 		circleWave.z = 2;
@@ -791,6 +791,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 					if (latLon.x <= east && latLon.x > west && latLon.z <= north && latLon.z > south){
 						Mesh marker = u.getUserPlacemarker();
 						marker.x = m.x;
+						marker.y = 0f;
 						marker.z = m.z;
 						m.addMarker(marker);
 					}
