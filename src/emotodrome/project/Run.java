@@ -304,20 +304,6 @@ public class Run extends Activity {
 			speed.setBackgroundResource(R.drawable.speed1);
 	}
 	
-	protected class LoadBackendThread extends AsyncTask<Activity, Void, Void>{
-
-		@Override
-		protected Void doInBackground(Activity... activity) {
-			backend = new Backend(activity[0]);
-			return null;
-		}
-		
-		protected void onPostExecute(Void result){
-
-		}
-		
-	}
-	
 	/*
 	protected class NewImageUpdateThread extends AsyncTask<Integer, Void, Void> {
 		private int index;
