@@ -43,9 +43,10 @@ public class Backend{
 	public double right;
 	private Thread serverListener = null;
 
-	public Backend(Activity activity, MyLocationManager locationManager) {
+	public Backend(Activity activity) {
 		this.activity = activity;
-		this.locationManager = locationManager;
+
+		locationManager = new MyLocationManager(activity);
 		System.out.println("Initial Lat: " + locationManager.getLatitude());
 		System.out.println("Initial Long: " + locationManager.getLongitude());
 

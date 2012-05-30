@@ -10,8 +10,6 @@ public class Pyrite extends Mesh
     private long time = 5000, last;
     public float distance;
     private Cube current;
-    private final int MAX_CUBES = 15;
-    private int num_cubes = 0;
     private float x, y, z, rotX, rotY, rotZ;
     private Stack<Cube> stack;
     private Random rand;
@@ -48,30 +46,29 @@ public class Pyrite extends Mesh
 
     private void postulate()
     {
-		float xx = rand.nextFloat() - 0.5f;
-		float yy = rand.nextFloat();
-		float zz = rand.nextFloat() - 0.5f;
-		//float scale = rand.nextFloat();
-		double len = Math.sqrt(xx * xx + yy * yy + zz * zz);
-		xx *=  distance / len;
-		yy *=  distance / len;
-		zz *=  distance / len;
-		x = current.x + xx;
-		y = current.y + yy;
-		z = current.z + zz;
-		rotX = rand.nextFloat() * 180;
-		rotY = rand.nextFloat() * 180;
-		rotZ = rand.nextFloat() * 180;
-		
-		stack.push(current);
-		current = (Cube) current.clone();
-		last = System.currentTimeMillis();
-		num_cubes++;
+	float xx = rand.nextFloat() - 0.5f;
+	float yy = rand.nextFloat();
+	float zz = rand.nextFloat() - 0.5f;
+	//float scale = rand.nextFloat();
+	double len = Math.sqrt(xx * xx + yy * yy + zz * zz);
+	xx *=  distance / len;
+	yy *=  distance / len;
+	zz *=  distance / len;
+	x = current.x + xx;
+	y = current.y + yy;
+	z = current.z + zz;
+	rotX = rand.nextFloat() * 180;
+	rotY = rand.nextFloat() * 180;
+	rotZ = rand.nextFloat() * 180;
+	
+	stack.push(current);
+	current = (Cube) current.clone();
+	last = System.currentTimeMillis();
     }
 
     public void draw(GL10 gl)
     {
-    	if(System.currentTimeMillis() - last >= time && num_cubes < MAX_CUBES)
+    	if(System.currentTimeMillis() - last >= time)
     		postulate();
 
     	for(Object c : stack.toArray())
@@ -80,16 +77,14 @@ public class Pyrite extends Mesh
     		((Cube) c).draw(gl);
     		gl.glPopMatrix();
     	}
-    	if (num_cubes < MAX_CUBES){
-	    	float t = 1.0f * (System.currentTimeMillis() - last) / time;
-	    	current.x = stack.peek().x * (1 - t) + t * x;
-			current.y = stack.peek().y * (1 - t) + t * y;
-			current.z = stack.peek().z * (1 - t) + t * z;
-			current.rx = stack.peek().rx * (1 - t) + t * rotX;
-			current.ry = stack.peek().ry * (1 - t) + t * rotY;
-			current.rz = stack.peek().rz * (1 - t) + t * rotZ;
-    	}
-    	
+
+    	float t = 1.0f * (System.currentTimeMillis() - last) / time;
+    	current.x = stack.peek().x * (1 - t) + t * x;
+		current.y = stack.peek().y * (1 - t) + t * y;
+		current.z = stack.peek().z * (1 - t) + t * z;
+		current.rx = stack.peek().rx * (1 - t) + t * rotX;
+		current.ry = stack.peek().ry * (1 - t) + t * rotY;
+		current.rz = stack.peek().rz * (1 - t) + t * rotZ;
 		gl.glPushMatrix();
 		current.draw(gl);
 		gl.glPopMatrix();

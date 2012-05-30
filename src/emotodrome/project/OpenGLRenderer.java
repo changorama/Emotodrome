@@ -420,11 +420,11 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 				p.rz = -90;
 				avatar = user.setUserAvatar(p);
 				if (num_users % 3 == 0)
-					avatar.loadGLTexture(gl, context, R.drawable.chango_lg);
+					avatar.loadGLTexture(gl, context, R.drawable.avatar);
 				else if (num_users % 3 == 1)
-					avatar.loadGLTexture(gl, context, R.drawable.victoria_md);
+					avatar.loadGLTexture(gl, context, R.drawable.avatar);
 				else
-					avatar.loadGLTexture(gl, context, R.drawable.luke_md);
+					avatar.loadGLTexture(gl, context, R.drawable.avatar);
 				num_users++;
 			}
 			gl.glPushMatrix();
