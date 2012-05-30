@@ -41,8 +41,8 @@ import android.widget.TextView;
  */
 public class Run extends Activity {
 	
+	public static Backend backend; 
 	private OpenGLRenderer openGLRenderer;
-	private Backend backend; 
 	private TextView textView;	
 	private Button button;
 	private boolean spawnerToggle, shouldGetImage, shouldUpdateData;
@@ -54,11 +54,9 @@ public class Run extends Activity {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.main);
-		
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		//String s = Server.getFileFromServer("README");
-
-		backend = new Backend(this);
-		
+		//backend = new Backend(this);
 		textView = (TextView)findViewById(R.id.text); 
 		textView.setText("***WELCOME*** (" + backend.getLatitude() + "," + backend.getLongitude() + ")");
 		
@@ -85,8 +83,6 @@ public class Run extends Activity {
 		
 		//new BackendThreadSpawner().execute();
 		//new MapUpdater().execute();
-		
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		//setContentView(openGLRenderer);
 		//glView.setRenderer(openGLRenderer);

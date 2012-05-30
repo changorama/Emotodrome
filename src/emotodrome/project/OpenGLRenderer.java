@@ -41,6 +41,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	private Backend backend;
 	
 	private HashMap<Integer, User> users;	//keys are user ids that map to a user currently connected to the server
+	private int num_users = 0;
 	private HashMap<Vec3, Float> iceData; 	//keys are a vector representing the lat/lon location of the ice and map to a float representing the amount of ice at this location
 	private Group ice;  					//holds the meshes that represent ice data
 	private Group closestIce;				//holds locator lines
@@ -115,6 +116,11 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	private Thread locateThread;
 	
 	public static boolean newUsers = false;
+	
+	private Mesh pyrite;
+	private Mesh circleWave;
+	private Mesh triangleOrigami;
+	private AnchoredBezier anchoredBezier;
 	
 	/**
 	 * constructor initializes the view we will render in, sets up sensors we will use, initializes our light/fog buffers, and initializes 
@@ -225,7 +231,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		closestIce = new Group();
 		backend.listenUserUpdates(users);		//begin listening for location updates from other users
 
-		camera = new Camera(new Vec3(0f, 0f, 0f), ((MapTile) mapgroup.get(CENTERINDEX)).getCenter());
+		camera = new Camera(new Vec3(0f, 0f, -2f), ((MapTile) mapgroup.get(CENTERINDEX)).getCenter());
 		userAvatar = new Cube(1f, 1f, 1f);
 		userAvatar.x = camera.getEyeX();
 		userAvatar.y = camera.getEyeY();
@@ -235,6 +241,18 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		originMarker.x = 0;
 		originMarker.y = .1f;
 		originMarker.z = 0;
+		
+		r = new Random();
+		pyrite = new Pyrite(.5f, .5f, .5f, r);
+		circleWave = new CircleWave(4, .01f, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
+		circleWave.x = -10;
+		circleWave.z = 3;
+		triangleOrigami = new TriangleOrigami(new Vec3(10, 0, 10), new Vec3(11, 1, 11), new Vec3(13, 0, 10.5f), r);
+		anchoredBezier = new AnchoredBezier(2, 0, 20, 0, 2, 1, 10);
+		
+		((MapTile) mapgroup.get(4)).addIce(pyrite);
+		((MapTile) mapgroup.get(4)).addIce(circleWave);
+		((MapTile) mapgroup.get(4)).addIce(triangleOrigami);
 		
 		new Thread(new IceThread()).start();
 		locateThread = new Thread(new FindClosest());
@@ -398,9 +416,16 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		for (User user:collection){
 			Mesh avatar = user.getUserAvatar();
 			if (avatar == null){
-				avatar = user.setUserAvatar(new Plane(1, 1));
-				avatar.rx = 90;
-				avatar.loadGLTexture(gl, context, R.drawable.avatar);
+				Plane p = new Plane(1, 1);
+				p.rz = -90;
+				avatar = user.setUserAvatar(p);
+				if (num_users % 3 == 0)
+					avatar.loadGLTexture(gl, context, R.drawable.chango_lg);
+				else if (num_users % 3 == 1)
+					avatar.loadGLTexture(gl, context, R.drawable.victoria_md);
+				else
+					avatar.loadGLTexture(gl, context, R.drawable.luke_md);
+				num_users++;
 			}
 			gl.glPushMatrix();
 			user.draw(gl);
@@ -432,7 +457,22 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		gl.glPushMatrix();
 		closestIce.draw(gl);
 		gl.glPopMatrix();
+		
+		gl.glPushMatrix();
+		anchoredBezier.draw(gl);
+		gl.glPopMatrix();
 
+//		gl.glPushMatrix();
+//		pyrite.draw(gl);
+//		gl.glPopMatrix();
+		
+//		gl.glPushMatrix();
+//		circleWave.draw(gl);
+//		gl.glPopMatrix();
+//		
+//		gl.glPushMatrix();
+//		triangleOrigami.draw(gl);
+//		gl.glPopMatrix();
 		//gl.glDisable(GL10.GL_TEXTURE_2D);
 //		angle = (angle + 3.0f) % 360;
 //		for (int i = 0; i < NUMSHAPES; i++){
@@ -744,6 +784,9 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 						marker.x = avatar.x = m.x;
 						marker.y = avatar.y = 0f;
 						marker.z = avatar.z = m.z;
+						marker.x = m.x;
+						marker.y = 0f;
+						marker.z = m.z;
 						m.addMarker(marker);
 					}
 				}	

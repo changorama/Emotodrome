@@ -13,18 +13,16 @@ import emotodrome.project.OpenGLRenderer;
  */
 public class User {
 
-	private Vec3 userVector;
-	private Vec3 previousUserVector;
 	private Mesh userAvatar;
 	private Mesh userPlacemarker;
 	private Vec3 latLon;
+	private Vec3 moveLaterVector;
 	private int id;
 	
 	public User(Vec3 userVector, int id){
-		this.userVector = userVector;
-		this.previousUserVector = userVector;
 		this.latLon = new Vec3(userVector.x, 0, userVector.z);
 		this.id = id;
+		moveLaterVector = new Vec3(0, 0, 0);
 		setUserPlacemarker(new Cube(.5f, .5f, .5f));
 	}
 	
@@ -36,23 +34,21 @@ public class User {
 	public Mesh getUserAvatar(){
 		return userAvatar;
 	}
-	
-	public void setUserVector(Vec3 userVector){
-		previousUserVector = this.userVector;
-		this.userVector = userVector;
-		userAvatar.setPosition(userVector);
-	}
-	
+
 	public void adjustUserVector(Vec3 moveVector){
-		userVector.setToAdd(moveVector);
-		userAvatar.x += moveVector.x;
-		userAvatar.y += moveVector.y;
-		userAvatar.z += moveVector.z;
-		System.out.println(userAvatar.x + "," + userAvatar.y + "," + userAvatar.z);
-	}
-	
-	public Vec3 getUserVector(){
-		return userVector;
+		if (userAvatar != null){
+			if (moveLaterVector != null){
+				moveVector.setToAdd(moveLaterVector);
+				moveLaterVector = null;
+			}
+			userAvatar.x += moveVector.x;
+			userAvatar.y += moveVector.y;
+			userAvatar.z += moveVector.z;
+			System.out.println(userAvatar.x + "," + userAvatar.y + "," + userAvatar.z);
+		}
+		else {
+			moveLaterVector.setToAdd(moveVector);
+		}
 	}
 	
 	public void draw(GL10 gl){
@@ -65,11 +61,6 @@ public class User {
 
 	public void setLatLon(Vec3 latLon) {
 		this.latLon = latLon;
-	}
-
-	public Vec3 getMoveAmount(Vec3 ratio) {
-		
-		return new Vec3((userVector.x - previousUserVector.x)/ratio.x, (userVector.y - previousUserVector.y)/ratio.y, (userVector.z - previousUserVector.z)/ratio.z);
 	}
 
 	public Mesh getUserPlacemarker() {
