@@ -120,6 +120,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	private Mesh pyrite;
 	private Mesh circleWave;
 	private Mesh triangleOrigami;
+	private AnchoredBezier anchoredBezier;
 	
 	/**
 	 * constructor initializes the view we will render in, sets up sensors we will use, initializes our light/fog buffers, and initializes 
@@ -230,7 +231,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		closestIce = new Group();
 		backend.listenUserUpdates(users);		//begin listening for location updates from other users
 
-		camera = new Camera(new Vec3(0f, 0f, 0f), ((MapTile) mapgroup.get(CENTERINDEX)).getCenter());
+		camera = new Camera(new Vec3(0f, 0f, -2f), ((MapTile) mapgroup.get(CENTERINDEX)).getCenter());
 		userAvatar = new Cube(1f, 1f, 1f);
 		userAvatar.x = camera.getEyeX();
 		userAvatar.y = camera.getEyeY();
@@ -242,11 +243,16 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		originMarker.z = 0;
 		
 		r = new Random();
-		//pyrite = new Pyrite(.5f, .5f, .5f, r);
+		pyrite = new Pyrite(.5f, .5f, .5f, r);
 		circleWave = new CircleWave(4, .01f, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
-		circleWave.x = -3;
-		circleWave.z = 2;
-		triangleOrigami = new TriangleOrigami(new Vec3(1, 0, 1), new Vec3(2, 1, 1), new Vec3(3, 0, .5f), r);
+		circleWave.x = -10;
+		circleWave.z = 3;
+		triangleOrigami = new TriangleOrigami(new Vec3(10, 0, 10), new Vec3(11, 1, 11), new Vec3(13, 0, 10.5f), r);
+		anchoredBezier = new AnchoredBezier(2, 0, 20, 0, 2, 1, 10);
+		
+		((MapTile) mapgroup.get(4)).addIce(pyrite);
+		((MapTile) mapgroup.get(4)).addIce(circleWave);
+		((MapTile) mapgroup.get(4)).addIce(triangleOrigami);
 		
 		new Thread(new IceThread()).start();
 		locateThread = new Thread(new FindClosest());
@@ -470,18 +476,22 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		gl.glPushMatrix();
 		closestIce.draw(gl);
 		gl.glPopMatrix();
+		
+		gl.glPushMatrix();
+		anchoredBezier.draw(gl);
+		gl.glPopMatrix();
 
-		gl.glPushMatrix();
-		pyrite.draw(gl);
-		gl.glPopMatrix();
+//		gl.glPushMatrix();
+//		pyrite.draw(gl);
+//		gl.glPopMatrix();
 		
-		gl.glPushMatrix();
-		circleWave.draw(gl);
-		gl.glPopMatrix();
-		
-		gl.glPushMatrix();
-		triangleOrigami.draw(gl);
-		gl.glPopMatrix();
+//		gl.glPushMatrix();
+//		circleWave.draw(gl);
+//		gl.glPopMatrix();
+//		
+//		gl.glPushMatrix();
+//		triangleOrigami.draw(gl);
+//		gl.glPopMatrix();
 		//gl.glDisable(GL10.GL_TEXTURE_2D);
 //		angle = (angle + 3.0f) % 360;
 //		for (int i = 0; i < NUMSHAPES; i++){

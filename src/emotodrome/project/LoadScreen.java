@@ -1,20 +1,25 @@
 package emotodrome.project;
 
 import emotodrome.data.Backend;
+import emotodrome.data.MyLocationManager;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.WindowManager;
 
 public class LoadScreen extends Activity{
-	Context context;
+	private Context context;
+	private MyLocationManager locationManager;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		locationManager = new MyLocationManager(this);
 		setContentView(R.layout.load_screen);
 		context = this;
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		
 		new LoadBackendThread().execute(this);
 	}
 	
@@ -24,18 +29,19 @@ public class LoadScreen extends Activity{
 		@Override
 		protected Void doInBackground(Activity... a) {
 			activity = a[0];
-			activity.runOnUiThread(new Runnable(){
-				@Override
-				public void run() {
-					Run.backend = new Backend(activity);
-				}
-			});
+//			activity.runOnUiThread(new Runnable(){
+//				@Override
+//				public void run() {
+					Run.backend = new Backend(activity, locationManager);
+//				}
+//			});
 
 			return null;
 		}
 		
-		protected void onPostExecute(Activity result){
+		protected void onPostExecute(Void result){
 			startActivity(new Intent(context, Run.class));
+			finish();
 		}
 	}
 

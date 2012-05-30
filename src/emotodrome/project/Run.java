@@ -56,7 +56,7 @@ public class Run extends Activity {
 		setContentView(R.layout.main);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		//String s = Server.getFileFromServer("README");
-		backend = new Backend(this);
+		//backend = new Backend(this);
 		textView = (TextView)findViewById(R.id.text); 
 		textView.setText("***WELCOME*** (" + backend.getLatitude() + "," + backend.getLongitude() + ")");
 		
