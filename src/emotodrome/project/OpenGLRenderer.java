@@ -75,6 +75,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	private Group mapgroup;					//holds meshes used to draw the map
 	
 	private boolean light = true;			//is light enabled
+	public boolean locating = false;
 
 	/* 
 	 * The initial light values for ambient and diffuse
@@ -243,17 +244,17 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		originMarker.z = 0;
 		
 		r = new Random();
-		pyrite = new Pyrite(.5f, .5f, .5f, r);
-		circleWave = new CircleWave(4, .01f, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
-		circleWave.x = -10;
-		circleWave.z = 3;
-		triangleOrigami = new TriangleOrigami(new Vec3(10, 0, 10), new Vec3(11, 1, 11), new Vec3(13, 0, 10.5f), r);
-		anchoredBezier = new AnchoredBezier(2, 0, 20, 0, 2, 1, 10);
+//		pyrite = new Pyrite(.5f, .5f, .5f, r);
+//		circleWave = new CircleWave(4, .01f, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
+//		circleWave.x = -10;
+//		circleWave.z = 3;
+//		triangleOrigami = new TriangleOrigami(new Vec3(10, 0, 10), new Vec3(11, 1, 11), new Vec3(13, 0, 10.5f), r);
+//		anchoredBezier = new AnchoredBezier(2, 0, 20, 0, 2, 1, 10);
 		
-		((MapTile) mapgroup.get(4)).addIce(pyrite);
-		((MapTile) mapgroup.get(4)).addIce(circleWave);
-		((MapTile) mapgroup.get(4)).addIce(triangleOrigami);
-		
+//		((MapTile) mapgroup.get(4)).addIce(pyrite);
+//		((MapTile) mapgroup.get(4)).addIce(circleWave);
+//		((MapTile) mapgroup.get(4)).addIce(triangleOrigami);
+//		
 		new Thread(new IceThread()).start();
 		locateThread = new Thread(new FindClosest());
 		
@@ -420,11 +421,11 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 				p.rz = -90;
 				avatar = user.setUserAvatar(p);
 				if (num_users % 3 == 0)
-					avatar.loadGLTexture(gl, context, R.drawable.avatar);
+					avatar.loadGLTexture(gl, context, R.drawable.chango_lg);
 				else if (num_users % 3 == 1)
-					avatar.loadGLTexture(gl, context, R.drawable.avatar);
+					avatar.loadGLTexture(gl, context, R.drawable.luke_md);
 				else
-					avatar.loadGLTexture(gl, context, R.drawable.avatar);
+					avatar.loadGLTexture(gl, context, R.drawable.victoria_md);
 				num_users++;
 			}
 			gl.glPushMatrix();
@@ -458,9 +459,9 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		closestIce.draw(gl);
 		gl.glPopMatrix();
 		
-		gl.glPushMatrix();
-		anchoredBezier.draw(gl);
-		gl.glPopMatrix();
+//		gl.glPushMatrix();
+//		anchoredBezier.draw(gl);
+//		gl.glPopMatrix();
 
 //		gl.glPushMatrix();
 //		pyrite.draw(gl);
@@ -687,6 +688,11 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			m.setSouthLat((float) (topBound - lonSize));
 			leftBound = i%3 < 2 ? rightBound : backend.left;
 		}
+		MapTile m = (MapTile) mapgroup.get(CENTERINDEX);
+		float center_x = (m.getEastLon() + m.getWestLon())/2;
+		float center_z = (m.getNorthLat() + m.getSouthLat())/2;
+		Vec3 center = new Vec3(center_x, 0, center_z);
+		System.out.println("center: " + center);
 	}
 
 	@Override
@@ -737,14 +743,15 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 	
 	//starts/stops the locate thread
 	public void toggleLocating(){
-		if (locateThread.isAlive()){
-			locateThread.stop();
+		if (locating){
+			locating = false;
 			if (closestIce.size() > 0){
 				closestIce.clear();
 			}
 		}
 		else {
-			locateThread.start();
+			locating = true;
+			new Thread(new FindClosest()).start();
 		}
 	}
 	
@@ -834,12 +841,12 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			double dist;
 			Vec3 closest = null;
 			boolean ice_on_tile = false;
-			while (true){
+			System.out.println("locating");
+			while (locating){
 				Vec3 userLocation = camera.getEye();
 				for (int i = 0; i < mapgroup.size(); i++){
 					MapTile m = (MapTile) mapgroup.get(i);
 					Group ice = m.getIce();
-					System.out.println("ice size: " + ice.size());
 					for (int j = 0; j < ice.size(); i++){
 						Vec3 pos = ice.get(j).getPosition();
 						if ((dist = pos.distance(userLocation)) < mindist){
@@ -855,7 +862,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 					}
 				}
 				if (!ice_on_tile){
-					MapTile m = (MapTile) mapgroup.get(4);
+					MapTile m = (MapTile) mapgroup.get(CENTERINDEX);
 					float center_x = (m.getEastLon() + m.getWestLon())/2;
 					float center_z = (m.getNorthLat() + m.getSouthLat())/2;
 					Vec3 center = new Vec3(center_x, 0, center_z);
@@ -863,25 +870,25 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 						if ((dist = loc.distance(center)) < mindist){
 							mindist = dist;
 							closest = loc;
-							System.out.println("ice at: " + loc);
+							System.out.println("closer ice at: " + loc + ", dist " + mindist);
 							if (closestIce.size() > 0)
 								closestIce.remove(0);
 							float xdist = Math.abs(loc.x - center.x);
 							float zdist = Math.abs(loc.z - center.z);
 							if (xdist > zdist){
 								if (loc.x > center.x){
-									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x, 0, userLocation.z + MAPHEIGHT)));
+									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x, 0, userLocation.x + 2*MAPWIDTH)));
 								}
 								else{
-									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x, 0, userLocation.z - MAPHEIGHT)));
+									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x, 0, userLocation.x - 2*MAPWIDTH)));
 								}
 							}
 							else{
 								if (loc.z > center.z){
-									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x + MAPWIDTH, 0, userLocation.z)));
+									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.z + 2*MAPHEIGHT, 0, userLocation.z)));
 								}
 								else{
-									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x - MAPWIDTH, 0, userLocation.z)));
+									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.z - 2*MAPHEIGHT, 0, userLocation.z)));
 								}
 							}
 						}

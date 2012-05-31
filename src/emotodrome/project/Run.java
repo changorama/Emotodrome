@@ -149,6 +149,7 @@ public class Run extends Activity {
 	protected void onDestroy(){
 		try {
 			backend.closeConnections();			//if application is closed, close connections to server
+			openGLRenderer.locating = false;
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
