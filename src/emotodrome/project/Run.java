@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import android.media.AudioManager;
@@ -75,9 +76,7 @@ public class Run extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
 		// Sound files loading part
 		snd = new SoundManager(getApplicationContext());  //Create an instance of our sound manager 
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);  //Set volume rocker mode to media volume
@@ -135,7 +134,6 @@ public class Run extends Activity {
 
 		//setContentView(openGLRenderer);
 		//glView.setRenderer(openGLRenderer);
-		
 	}
 
 
@@ -149,7 +147,9 @@ public class Run extends Activity {
 	protected void onDestroy(){
 		try {
 			backend.closeConnections();			//if application is closed, close connections to server
-			openGLRenderer.locating = false;
+			if (openGLRenderer != null){
+				openGLRenderer.locating = false;
+			}
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

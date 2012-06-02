@@ -244,12 +244,12 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		originMarker.z = 0;
 		
 		r = new Random();
-//		pyrite = new Pyrite(.5f, .5f, .5f, r);
-//		circleWave = new CircleWave(4, .01f, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
-//		circleWave.x = -10;
-//		circleWave.z = 3;
-//		triangleOrigami = new TriangleOrigami(new Vec3(10, 0, 10), new Vec3(11, 1, 11), new Vec3(13, 0, 10.5f), r);
-//		anchoredBezier = new AnchoredBezier(2, 0, 20, 0, 2, 1, 10);
+		pyrite = new Pyrite(.5f, .5f, .5f, r);
+		circleWave = new CircleWave(4, .01f, .1f, 1f, .01f, .1f, 0f, 0f, 2f, new float[] {0,0,0,1}, new float[]{0,1,0,1});
+		circleWave.x = -10;
+		circleWave.z = 3;
+		triangleOrigami = new TriangleOrigami(new Vec3(10, 0, 10), new Vec3(11, 1, 11), new Vec3(13, 0, 10.5f), r);
+		anchoredBezier = new AnchoredBezier(2, 0, 20, 0, 2, 1, 10);
 		
 //		((MapTile) mapgroup.get(4)).addIce(pyrite);
 //		((MapTile) mapgroup.get(4)).addIce(circleWave);
@@ -463,17 +463,18 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 //		anchoredBezier.draw(gl);
 //		gl.glPopMatrix();
 
-//		gl.glPushMatrix();
-//		pyrite.draw(gl);
-//		gl.glPopMatrix();
+		gl.glPushMatrix();
+		pyrite.draw(gl);
+		gl.glPopMatrix();
 		
-//		gl.glPushMatrix();
-//		circleWave.draw(gl);
-//		gl.glPopMatrix();
-//		
-//		gl.glPushMatrix();
-//		triangleOrigami.draw(gl);
-//		gl.glPopMatrix();
+		gl.glPushMatrix();
+		circleWave.draw(gl);
+		gl.glPopMatrix();
+		
+		gl.glPushMatrix();
+		triangleOrigami.draw(gl);
+		gl.glPopMatrix();
+
 		//gl.glDisable(GL10.GL_TEXTURE_2D);
 //		angle = (angle + 3.0f) % 360;
 //		for (int i = 0; i < NUMSHAPES; i++){
@@ -692,7 +693,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		float center_x = (m.getEastLon() + m.getWestLon())/2;
 		float center_z = (m.getNorthLat() + m.getSouthLat())/2;
 		Vec3 center = new Vec3(center_x, 0, center_z);
-		System.out.println("center: " + center);
+		System.out.println("ice center: " + center);
 	}
 
 	@Override
@@ -779,7 +780,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 						c.z = m.z;
 						c.y = 1;
 						m.addIce(c);
-						System.out.println("FOUND ICE");
+						System.out.println("FOUND ICE: " + iceValue);
 					}
 				}
 				for (User u : users.values()){
@@ -838,27 +839,27 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		@Override
 		public void run() {
 			double mindist = 100000;
+			double minLatLonDist = 100000;
 			double dist;
 			Vec3 closest = null;
 			boolean ice_on_tile = false;
-			System.out.println("locating");
 			while (locating){
+				System.out.println("locating");
 				Vec3 userLocation = camera.getEye();
 				for (int i = 0; i < mapgroup.size(); i++){
 					MapTile m = (MapTile) mapgroup.get(i);
 					Group ice = m.getIce();
 					for (int j = 0; j < ice.size(); i++){
 						Vec3 pos = ice.get(j).getPosition();
-						if ((dist = pos.distance(userLocation)) < mindist){
+						if ((dist = pos.distance(userLocation)) <= mindist){
 							mindist = dist;
 							closest = pos;
-							System.out.println("ice at: " + pos);
+							System.out.println("found ice at: " + pos);
 							if (closestIce.size() > 0)
 								closestIce.remove(0);
 							closestIce.add(new LocatorLine(userLocation, closest));
 							ice_on_tile = true;
 						}
-						System.out.println("dist is " + dist);
 					}
 				}
 				if (!ice_on_tile){
@@ -867,28 +868,31 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 					float center_z = (m.getNorthLat() + m.getSouthLat())/2;
 					Vec3 center = new Vec3(center_x, 0, center_z);
 					for (Vec3 loc : iceData.keySet()){
-						if ((dist = loc.distance(center)) < mindist){
-							mindist = dist;
+//						if (loc.x == 108 && loc.z == 43){
+//							System.out.println("distance: " + loc.distance(center) + ", mindist: " + mindist);
+//						}
+						if ((dist = loc.distance(center)) < minLatLonDist){
+							minLatLonDist = dist;
 							closest = loc;
-							System.out.println("closer ice at: " + loc + ", dist " + mindist);
 							if (closestIce.size() > 0)
 								closestIce.remove(0);
 							float xdist = Math.abs(loc.x - center.x);
 							float zdist = Math.abs(loc.z - center.z);
+							System.out.println("closer ice at: " + loc + ", dist " + minLatLonDist+ ", xdist " + xdist+ ", zdist " + zdist);
 							if (xdist > zdist){
 								if (loc.x > center.x){
-									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x, 0, userLocation.x + 2*MAPWIDTH)));
+									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x + 2*MAPWIDTH, 0, userLocation.z)));
 								}
 								else{
-									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x, 0, userLocation.x - 2*MAPWIDTH)));
+									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x - 2*MAPWIDTH, 0, userLocation.z)));
 								}
 							}
 							else{
-								if (loc.z > center.z){
-									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.z + 2*MAPHEIGHT, 0, userLocation.z)));
+								if (loc.z < center.z){
+									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x, 0, userLocation.z + 2*MAPHEIGHT)));
 								}
 								else{
-									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.z - 2*MAPHEIGHT, 0, userLocation.z)));
+									closestIce.add(new LocatorLine(userLocation, new Vec3(userLocation.x, 0, userLocation.z - 2*MAPHEIGHT)));
 								}
 							}
 						}

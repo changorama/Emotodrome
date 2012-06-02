@@ -43,7 +43,7 @@ public class Server {
 	private Socket in_socket = null;
 	private Queue<LocationValuePair> addQueue;
 	private Queue<Vec3> remQueue;
-	public boolean connected = true;
+	public boolean connected = false;
 	private BufferedReader in = null;
 
 	public Server(String android_id, double longitude, double latitude, int zoom) {
@@ -108,7 +108,7 @@ public class Server {
 	}
 	
 	public void sendToServer(String s){
-		if (out_socket.isConnected() && connected)
+		if (connected && out_socket.isConnected())
 			try {
 				CharsetEncoder enc = Charset.forName("US-ASCII").newEncoder();
 				out_socket.write(enc.encode(CharBuffer.wrap(s)));
@@ -147,7 +147,7 @@ public class Server {
 						out.close();
 						return 0;
 					}
-					else {
+					else if (!line.startsWith("LOC") && !line.startsWith("LALO") && !line.startsWith("QUIT")){
 						out.print(line + "\n");
 					}
 				}
@@ -253,6 +253,10 @@ public class Server {
 						int lon = Integer.valueOf(values[2]);
 						remQueue.add(new Vec3(lat, 0, lon));
 					}
+					else if (request.equals("QUIT")){
+						int key = Integer.valueOf(values[1]);
+						users.remove(key);
+					}
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -281,18 +285,19 @@ public class Server {
 	}
 
 	public void close() throws IOException, InterruptedException {
-		connected = false;
-		Thread.sleep(50);
-		if (out_socket != null && out_socket.isOpen()){
-			out_socket.close();
-		}
-		if (in_socket != null && !in_socket.isClosed()){
-			if (in != null){
-				in.close();
+		if (connected){
+			connected = false;
+			Thread.sleep(50);
+			if (out_socket != null && out_socket.isOpen()){
+				out_socket.close();
 			}
-			in_socket.close();
+			if (in_socket != null && !in_socket.isClosed()){
+				if (in != null){
+					in.close();
+				}
+				in_socket.close();
+			}
 		}
-		
 	}
 }
 
