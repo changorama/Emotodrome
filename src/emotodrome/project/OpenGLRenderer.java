@@ -765,13 +765,12 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 				MapTile m = (MapTile) mapgroup.get(i);
 				float east = m.getEastLon();
 				float west = m.getWestLon();
-				//CHANGE TO m.getNorthLat()/m.getSouthLat FOR REAL STUFF
+				//use these if trying to see fake ice data at (0,0)
 //				float north = 43.1f;
 //				float south = 42.9f;
 				float north = m.getNorthLat();
 				float south = m.getSouthLat();
 				
-				//still need to make it so same ice not added multiple times
 				for (Vec3 pos : iceData.keySet()){
 					if (pos.x <= east && pos.x > west && pos.z <= north && pos.z > south){
 						float iceValue = iceData.get(pos);
@@ -844,7 +843,6 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 			Vec3 closest = null;
 			boolean ice_on_tile = false;
 			while (locating){
-				System.out.println("locating");
 				Vec3 userLocation = camera.getEye();
 				for (int i = 0; i < mapgroup.size(); i++){
 					MapTile m = (MapTile) mapgroup.get(i);
@@ -854,7 +852,6 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 						if ((dist = pos.distance(userLocation)) <= mindist){
 							mindist = dist;
 							closest = pos;
-							System.out.println("found ice at: " + pos);
 							if (closestIce.size() > 0)
 								closestIce.remove(0);
 							closestIce.add(new LocatorLine(userLocation, closest));
@@ -868,9 +865,6 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 					float center_z = (m.getNorthLat() + m.getSouthLat())/2;
 					Vec3 center = new Vec3(center_x, 0, center_z);
 					for (Vec3 loc : iceData.keySet()){
-//						if (loc.x == 108 && loc.z == 43){
-//							System.out.println("distance: " + loc.distance(center) + ", mindist: " + mindist);
-//						}
 						if ((dist = loc.distance(center)) < minLatLonDist){
 							minLatLonDist = dist;
 							closest = loc;

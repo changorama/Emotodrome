@@ -1,5 +1,6 @@
 package emotodrome.user;
 
+import emotodrome.mesh.LocatorLine;
 import emotodrome.mesh.Vec3;
 
 
@@ -16,6 +17,7 @@ public class Camera {
 	private float skyHeight = 101f;	//max height we can fly to
 	private String rotatorP = "";	//up and down turning
 	private String rotatorR = "";	//right and left turning
+	private LocatorLine northLine;
 	
 	public Camera(){
 		eye = new Vec3(0, 0, 1);
