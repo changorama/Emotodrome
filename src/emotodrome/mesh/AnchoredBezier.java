@@ -160,13 +160,13 @@ public class AnchoredBezier
 			3 * (1 - t) * t * t * controls[8] + 
 			t * t * t * controls[11]);
 		    
-		    System.out.println("v0: " + verts[0] + " v1: " + verts[1] + " v2: " + verts[2] + " v3: " + verts[3] + " v4: " + verts[4] + " v5: " + verts[5]);
-		    for (int j = 0; j < 12; j+=3){
-		    	System.out.print("x"+j + ": " + controls[j] + " ");
-		    	System.out.print("y"+j + ": " + controls[j+1] + " ");
-		    	System.out.println("z"+j + ": " + controls[j+2]);
-		    	
-		    }
+//		    System.out.println("v0: " + verts[0] + " v1: " + verts[1] + " v2: " + verts[2] + " v3: " + verts[3] + " v4: " + verts[4] + " v5: " + verts[5]);
+//		    for (int j = 0; j < 12; j+=3){
+//		    	System.out.print("x"+j + ": " + controls[j] + " ");
+//		    	System.out.print("y"+j + ": " + controls[j+1] + " ");
+//		    	System.out.println("z"+j + ": " + controls[j+2]);
+//		    	
+//		    }
 		    
 			ByteBuffer vbb = ByteBuffer.allocateDirect(verts.length * 4);
 			vbb.order(ByteOrder.nativeOrder());

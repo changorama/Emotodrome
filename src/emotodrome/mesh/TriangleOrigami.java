@@ -17,7 +17,7 @@ public class TriangleOrigami extends Mesh implements Gadget
 	private float newLength, oldLength;
 	private Random rand;
 	private int state = 0, lastEnd;
-	private final int MAX_TRIANGLES = 30;
+	private final int MAX_TRIANGLES = 20;
 	private int num_triangles = 0;
 							/*
 							* State 0 means we haven't finished constructing the object yet.

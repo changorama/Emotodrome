@@ -369,7 +369,7 @@ public class Backend{
 
 	public void updateUserLocation(Vec3 v){
 		server.sendToServer("m," + v.x + "," + v.y + "," + v.z + "\n");
-		System.out.println("sent " + v.x + "," + v.y + "," + v.z);
+//		System.out.println("sent " + v.x + "," + v.y + "," + v.z);
 	}
 	
 	public void sendUserLatLon(double latitude, double longitude){
@@ -394,6 +394,10 @@ public class Backend{
 		server.sendToServer("q,0,0,0\n");
 		server.close();
 		System.out.println("server closed");
+	}
+	
+	public boolean checkConnected(){
+		return server.connected;
 	}
 
 }

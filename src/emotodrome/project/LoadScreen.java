@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class LoadScreen extends Activity{
 	private Context context;
@@ -40,8 +41,16 @@ public class LoadScreen extends Activity{
 		}
 		
 		protected void onPostExecute(Void result){
-			startActivity(new Intent(context, Run.class));
-			finish();
+			super.onPostExecute(result);
+			if (!Run.backend.checkConnected()){
+				Toast toast = Toast.makeText(activity, "Error connecting to server, please check your connection", Toast.LENGTH_SHORT);
+				toast.show();
+				finish();
+			}
+			else{
+				startActivity(new Intent(context, Run.class));
+				finish();
+			}
 		}
 	}
 
