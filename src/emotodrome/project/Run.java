@@ -18,11 +18,14 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.media.MediaPlayer;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.content.Context;
+
 
 /**
  * Title: Emotodrome
@@ -54,6 +57,8 @@ public class Run extends Activity {
 	private int updatedCount;
 	private boolean optionsVisible = false;
 	
+
+	
 	
 	//Variables for sound control
 	private boolean volcontrolVisible = false;
@@ -65,20 +70,31 @@ public class Run extends Activity {
 	public SeekBar seekvolbar;  // Volume control bar 
 	OnSeekBarChangeListener barChange; //Handler for seekbar
 	
+	
+	private MediaPlayer mp;  //Media player for bg music  
 	// 
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
 		// Sound files loading part
 		snd = new SoundManager(getApplicationContext());  //Create an instance of our sound manager 
 		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);  //Set volume rocker mode to media volume
 		bellSound = snd.load(R.raw.gong_burmese);
 		drumSound = snd.load(R.raw.bowla_emoto);
+		
+		
+		// Background music load 
+		mp = new MediaPlayer();   //Create Mediaplayer object 
+		mp = MediaPlayer.create(getBaseContext(), R.raw.substancesuperslow);
+
+		//mp.setDataSource();
+		//mp.prepare();
+		mp.setLooping(true);
+		mp.start();
+		
 		
 		// Seekbar listener, This will detect moving signal by seekbar 
 		barChange = new OnSeekBarChangeListener(){
@@ -117,7 +133,6 @@ public class Run extends Activity {
 					backend.getServerUpdates();
 				}
 			}
-			
 		});*/
 
 		shouldGetImage = true;
@@ -128,7 +143,6 @@ public class Run extends Activity {
 		//new MapUpdater().execute();
 		//setContentView(openGLRenderer);
 		//glView.setRenderer(openGLRenderer);
-		
 	}
 
 	@Override
@@ -141,13 +155,20 @@ public class Run extends Activity {
 	protected void onDestroy(){
 		try {
 			backend.closeConnections();			//if application is closed, close connections to server
+			if (openGLRenderer != null){
+				openGLRenderer.locating = false;
+			}
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 		super.onDestroy();
+		if( mp != null)
+			mp.release(); // Mediaplayer release;
+		mp = null;
 	}
 
 	@Override
@@ -249,7 +270,7 @@ public class Run extends Activity {
 		volcontrolVisible = !volcontrolVisible;
 	}
 	
-	
+
 	
 	public void volplusclicked(View View){
 		
