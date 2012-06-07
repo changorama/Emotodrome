@@ -88,7 +88,7 @@ public class Run extends Activity {
 		
 		// Background music load 
 		mp = new MediaPlayer();   //Create Mediaplayer object 
-		mp = MediaPlayer.create(getBaseContext(), R.raw.substancesuperslow);
+		//mp = MediaPlayer.create(getBaseContext(), R.raw.substancesuperslow);
 
 		//mp.setDataSource();
 		//mp.prepare();
@@ -204,10 +204,12 @@ public class Run extends Activity {
 		if (optionsVisible) {
 			findViewById(R.id.optionSub1).setVisibility(View.GONE);
 			findViewById(R.id.optionSub2).setVisibility(View.GONE);
+			findViewById(R.id.optionSub3).setVisibility(View.GONE);
 		}
 		else {
 			findViewById(R.id.optionSub1).setVisibility(View.VISIBLE);
 			findViewById(R.id.optionSub2).setVisibility(View.VISIBLE);
+			findViewById(R.id.optionSub3).setVisibility(View.VISIBLE);
 		}
 		optionsVisible = !optionsVisible;
 	}
@@ -216,36 +218,41 @@ public class Run extends Activity {
 	public void changeOption(View view){
 		Button option = (Button) view;
 		Button main = (Button) findViewById(R.id.optionMain);
-		CharSequence current = main.getText();
 		CharSequence newText = option.getText();
-		main.setText(newText);
-		option.setText(current);
 		toggleOptions(main);
 		
 		if (newText.equals("SPEED")){
-			setSpeedIcon();
+			toggleSpeedIcon();
 		}
 		else if (newText.equals("LOCATE")){
-			setLocateIcon();
+			toggleLocateIcon();
 		}
 	}
 	
 	//add locate icon to the screen
-	private void setLocateIcon() {
-		Button loc = (Button) findViewById(R.id.currentOption);
-		loc.setBackgroundResource(R.drawable.locate1);		
+	private void toggleLocateIcon() {
+		Button loc = (Button) findViewById(R.id.locate_tab);
+		if (loc.getVisibility() == View.VISIBLE){
+			loc.setVisibility(View.INVISIBLE);
+		}
+		else{
+			loc.setVisibility(View.VISIBLE);
+		}	
+	}
+	
+	private void toggleSpeedIcon() {
+		Button speed = (Button) findViewById(R.id.speed_tab);
+		if (speed.getVisibility() == View.VISIBLE){
+			speed.setVisibility(View.INVISIBLE);
+		}
+		else{
+			speed.setVisibility(View.VISIBLE);
+		}	
 	}
 
 	//handles click on a side tab
-	public void currentOptionClicked(View view){
-		Button main = (Button) findViewById(R.id.optionMain);
-		String current = main.getText().toString();
-		if (current.equals("SPEED")){
-			changeSpeed();
-		}
-		else if (current.equals("LOCATE")){
-			openGLRenderer.toggleLocating();
-		}
+	public void locateClicked(View view){
+		openGLRenderer.toggleLocating();
 	}
 	
 
@@ -284,7 +291,7 @@ public class Run extends Activity {
 		//soundEffects.play(drumSound, fvolume, fvolume, 0, 1, fSpeed);
 	}
 	//increase speed unless we are at max speed, in which case go back to first speed
-	private void changeSpeed(){
+	public void changeSpeed(View v){
 		if (openGLRenderer.speed  == openGLRenderer.SPEED1)
 		{
 			openGLRenderer.speed = openGLRenderer.SPEED2;
@@ -306,7 +313,7 @@ public class Run extends Activity {
 	
 	//set the speed icon based on our current speed
 	private void setSpeedIcon(){
-		Button speed = (Button) findViewById(R.id.currentOption);
+		Button speed = (Button) findViewById(R.id.speed_tab);
 		if (openGLRenderer.speed  == openGLRenderer.SPEED2)
 			speed.setBackgroundResource(R.drawable.speed2);
 		else if (openGLRenderer.speed  == openGLRenderer.SPEED3)

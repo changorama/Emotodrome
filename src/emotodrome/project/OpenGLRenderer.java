@@ -232,7 +232,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		closestIce = new Group();
 		backend.listenUserUpdates(users);		//begin listening for location updates from other users
 
-		camera = new Camera(new Vec3(0f, 0f, -2f), ((MapTile) mapgroup.get(CENTERINDEX)).getCenter());
+		camera = new Camera(new Vec3(0f, 0f, 2f), ((MapTile) mapgroup.get(CENTERINDEX)).getCenter());
 		userAvatar = new Cube(1f, 1f, 1f);
 		userAvatar.x = camera.getEyeX();
 		userAvatar.y = camera.getEyeY();
@@ -420,12 +420,15 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 				Plane p = new Plane(1, 1);
 				p.rz = -90;
 				avatar = user.setUserAvatar(p);
-				if (num_users % 3 == 0)
+				if (num_users % 3 == 0){
 					avatar.loadGLTexture(gl, context, R.drawable.chango_lg);
-				else if (num_users % 3 == 1)
+				}
+				else if (num_users % 3 == 1){
 					avatar.loadGLTexture(gl, context, R.drawable.luke_md);
-				else
+				}
+				else{
 					avatar.loadGLTexture(gl, context, R.drawable.victoria_md);
+				}
 				num_users++;
 			}
 			gl.glPushMatrix();
@@ -463,9 +466,9 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 //		anchoredBezier.draw(gl);
 //		gl.glPopMatrix();
 
-		gl.glPushMatrix();
-		pyrite.draw(gl);
-		gl.glPopMatrix();
+//		gl.glPushMatrix();
+//		pyrite.draw(gl);
+//		gl.glPopMatrix();
 		
 		gl.glPushMatrix();
 		circleWave.draw(gl);
@@ -787,14 +790,12 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 					System.out.println("USER LOC :" + latLon);
 					if (latLon.x <= east && latLon.x > west && latLon.z <= north && latLon.z > south){
 						Mesh marker = u.getUserPlacemarker();
-						Mesh avatar = u.setUserAvatar(new Plane(1, 1));
-						marker.x = avatar.x = m.x;
-						marker.y = avatar.y = 0f;
-						marker.z = avatar.z = m.z;
+						u.adjustUserVector(new Vec3(m.x,m.y,m.z));
 						marker.x = m.x;
 						marker.y = 0f;
 						marker.z = m.z;
 						m.addMarker(marker);
+						u.discovered = true;
 					}
 				}	
 			}
@@ -819,11 +820,12 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 					if (latLon.x <= east && latLon.x > west && latLon.z <= north && latLon.z > south){
 						System.out.println("user placed at" + m.x + "," + m.z);
 						Mesh marker = u.getUserPlacemarker();
-						Mesh avatar = u.setUserAvatar(new Plane(1, 1));
-						marker.x = avatar.x = m.x;
-						marker.y = avatar.y = 0f;
-						marker.z = avatar.z = m.z;
+						u.adjustUserVector(new Vec3(m.x,m.y,m.z));
+						marker.x = m.x;
+						marker.y = 0f;
+						marker.z = m.z;
 						m.addMarker(marker);
+						u.discovered = true;
 					}
 				}
 				
@@ -849,7 +851,7 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 					Group ice = m.getIce();
 					for (int j = 0; j < ice.size(); i++){
 						Vec3 pos = ice.get(j).getPosition();
-						if ((dist = pos.distance(userLocation)) <= mindist){
+						if ((dist = pos.distance(userLocation)) < mindist){
 							mindist = dist;
 							closest = pos;
 							if (closestIce.size() > 0)
