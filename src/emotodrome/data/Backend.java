@@ -391,8 +391,8 @@ public class Backend{
 	}
 
 	public void closeConnections() throws IOException, InterruptedException {
-		server.sendToServer("q,0,0,0\n");
-		server.close();
+		//server.sendToServer("q,0,0,0\n");
+		//server.close();
 		System.out.println("server closed");
 	}
 	

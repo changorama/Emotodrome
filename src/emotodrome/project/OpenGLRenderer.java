@@ -417,14 +417,15 @@ public class OpenGLRenderer implements Renderer, OnGestureListener, SensorEventL
 		for (User user:collection){
 			Mesh avatar = user.getUserAvatar();
 			if (avatar == null){
+				System.out.println("TEXTURING " + num_users);
 				Plane p = new Plane(1, 1);
 				p.rz = -90;
 				avatar = user.setUserAvatar(p);
 				if (num_users % 3 == 0){
-					avatar.loadGLTexture(gl, context, R.drawable.chango_lg);
+					avatar.loadGLTexture(gl, context, R.drawable.luke_md);
 				}
 				else if (num_users % 3 == 1){
-					avatar.loadGLTexture(gl, context, R.drawable.luke_md);
+					avatar.loadGLTexture(gl, context, R.drawable.chango_lg);
 				}
 				else{
 					avatar.loadGLTexture(gl, context, R.drawable.victoria_md);
